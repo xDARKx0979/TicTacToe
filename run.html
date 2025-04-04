@@ -22,6 +22,7 @@
             width: 100%;
             height: 600px;
             border: none;
+            background-color: #000;
         }
         
         .game-description {
@@ -55,7 +56,7 @@
         <h1>Run 3</h1>
         
         <div class="game-container">
-            <iframe class="game-frame" src="Run/index.html" allowfullscreen></iframe>
+            <iframe class="game-frame" src="Run/index.html" sandbox="allow-same-origin allow-scripts" allowfullscreen></iframe>
         </div>
         
         <div class="game-description">
@@ -74,5 +75,20 @@
             <a href="index.html" class="back-button">Back to Menu</a>
         </div>
     </div>
+    
+    <script>
+        // This script will help manage iframe loading issues
+        document.addEventListener('DOMContentLoaded', function() {
+            var iframe = document.querySelector('.game-frame');
+            
+            // If the iframe fails to load properly, show an error message
+            iframe.onerror = function() {
+                iframe.style.display = 'none';
+                var errorDiv = document.createElement('div');
+                errorDiv.innerHTML = '<div style="height:600px;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;text-align:center;padding:20px;"><h2>Game failed to load</h2><p>Please try refreshing the page.</p></div>';
+                document.querySelector('.game-container').appendChild(errorDiv);
+            };
+        });
+    </script>
 </body>
 </html> 

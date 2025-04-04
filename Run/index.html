@@ -5,7 +5,6 @@
 	<title>Run 3</title>
 	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<meta name="apple-mobile-web-app-capable" content="yes">
-	<script type="text/javascript" src="./Run3.js"></script>
 	<script>
 		window.addEventListener ("touchmove", function (event) { event.preventDefault (); }, { capture: false, passive: false });
 		if (typeof window.devicePixelRatio !='undefined' && window.devicePixelRatio > 2) {
@@ -43,8 +42,29 @@
 	
 	<div id="openfl-content"></div>
 	
+	<!-- Load the game script -->
+	<script type="text/javascript" src="./Run3.js"></script>
+	
 	<script type="text/javascript">
-		lime.embed ("Run3", "openfl-content", 800, 600, { parameters: {} });
+		// Wait for the document to be fully loaded
+		document.addEventListener('DOMContentLoaded', function() {
+			// Short delay to ensure the script is processed
+			setTimeout(function() {
+				try {
+					if (typeof lime !== 'undefined' && lime.embed) {
+						lime.embed("Run3", "openfl-content", 800, 600, { parameters: {} });
+					} else {
+						throw new Error("Lime object not available");
+					}
+				} catch (e) {
+					console.error("Error loading Run3 game:", e);
+					document.getElementById("openfl-content").innerHTML = 
+						"<div style='color:white;padding:20px;text-align:center;'>"+
+						"<h2>Game failed to load</h2>"+
+						"<p>Please try refreshing the page or check your browser compatibility.</p></div>";
+				}
+			}, 500); // Small delay to ensure script is processed
+		});
 	</script>
 </body>
 </html> 
