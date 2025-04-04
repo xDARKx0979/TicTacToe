@@ -7,21 +7,31 @@
     <link rel="stylesheet" href="styles.css">
     <script src="theme.js"></script>
     <style>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2 {
+            text-align: center;
+            color: var(--text-color);
+        }
+        
         .game-container {
             position: relative;
             width: 100%;
-            max-width: 900px;
+            height: 600px;
             margin: 0 auto;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 0 20px var(--shadow-color);
-            background-color: var(--container-bg);
+            background-color: #000;
         }
         
-        .game-frame {
+        #openfl-content {
             width: 100%;
-            height: 600px;
-            border: none;
+            height: 100%;
             background-color: #000;
         }
         
@@ -34,18 +44,53 @@
             transition: background-color 0.3s ease;
         }
         
-        .game-description h2 {
-            color: var(--text-color);
-            margin-bottom: 15px;
-        }
-        
         .game-description p {
             color: var(--text-secondary);
             margin-bottom: 10px;
         }
         
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-button:hover {
+            background-color: #d32f2f;
+        }
+        
+        @font-face {
+            font-family: 'Comfortaa Bold';
+            src: url('Run/font/COMFORTAA-BOLD.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Comfortaa';
+            src: url('Run/font/Comfortaa.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Permanent Marker';
+            src: url('Run/font/PERMANENTMARKER.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
         @media screen and (max-width: 600px) {
-            .game-frame {
+            .game-container {
                 height: 400px;
             }
         }
@@ -56,7 +101,7 @@
         <h1>Run 3</h1>
         
         <div class="game-container">
-            <iframe class="game-frame" src="Run/index.html" sandbox="allow-same-origin allow-scripts" allowfullscreen></iframe>
+            <div id="openfl-content"></div>
         </div>
         
         <div class="game-description">
@@ -76,18 +121,32 @@
         </div>
     </div>
     
-    <script>
-        // This script will help manage iframe loading issues
-        document.addEventListener('DOMContentLoaded', function() {
-            var iframe = document.querySelector('.game-frame');
-            
-            // If the iframe fails to load properly, show an error message
-            iframe.onerror = function() {
-                iframe.style.display = 'none';
-                var errorDiv = document.createElement('div');
-                errorDiv.innerHTML = '<div style="height:600px;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;text-align:center;padding:20px;"><h2>Game failed to load</h2><p>Please try refreshing the page.</p></div>';
-                document.querySelector('.game-container').appendChild(errorDiv);
-            };
+    <!-- Load the game script -->
+    <script type="text/javascript" src="Run/Run3.js"></script>
+    
+    <script type="text/javascript">
+        // Wait for the window to fully load
+        window.addEventListener('load', function() {
+            // Make sure we have the lime object available
+            if (typeof lime !== 'undefined' && lime.embed) {
+                try {
+                    lime.embed("Run3", "openfl-content", 800, 600, { parameters: {} });
+                    console.log("Game initialized successfully");
+                } catch (e) {
+                    console.error("Error initializing game:", e);
+                    document.getElementById("openfl-content").innerHTML = 
+                        "<div style='color:white;padding:20px;text-align:center;'>"+
+                        "<h2>Game failed to load</h2>"+
+                        "<p>Please try refreshing the page or check your browser compatibility.</p></div>";
+                }
+            } else {
+                // If lime object is not available, show an error
+                console.error("Lime object not available");
+                document.getElementById("openfl-content").innerHTML = 
+                    "<div style='color:white;padding:20px;text-align:center;'>"+
+                    "<h2>Game failed to load</h2>"+
+                    "<p>The game engine could not be initialized. Please try a different browser.</p></div>";
+            }
         });
     </script>
 </body>
