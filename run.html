@@ -29,10 +29,10 @@
             background-color: #000;
         }
         
-        #openfl-content {
+        .game-frame {
             width: 100%;
             height: 100%;
-            background-color: #000;
+            border: none;
         }
         
         .game-description {
@@ -68,63 +68,6 @@
             background-color: #d32f2f;
         }
         
-        @font-face {
-            font-family: 'Comfortaa Bold';
-            src: url('Run/font/COMFORTAA-BOLD.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-        
-        @font-face {
-            font-family: 'Comfortaa';
-            src: url('Run/font/Comfortaa.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-        
-        @font-face {
-            font-family: 'Permanent Marker';
-            src: url('Run/font/PERMANENTMARKER.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        .loading-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-            color: white;
-            z-index: 100;
-        }
-
-        .loading-bar {
-            width: 80%;
-            height: 20px;
-            background-color: #333;
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .loading-progress {
-            width: 0%;
-            height: 100%;
-            background-color: #4CAF50;
-            transition: width 0.3s ease;
-        }
-
-        .loading-text {
-            font-size: 18px;
-            margin-top: 10px;
-        }
-        
         @media screen and (max-width: 600px) {
             .game-container {
                 height: 400px;
@@ -137,14 +80,7 @@
         <h1>Run 3</h1>
         
         <div class="game-container">
-            <div id="openfl-content"></div>
-            <div id="loading-container" class="loading-container">
-                <h2>Loading Run 3</h2>
-                <div class="loading-bar">
-                    <div id="loading-progress" class="loading-progress"></div>
-                </div>
-                <div id="loading-text" class="loading-text">Loading game files...</div>
-            </div>
+            <iframe class="game-frame" src="Run-Best-Version--main/tn6pS9dCf37xAhkJv/index.html" allowfullscreen></iframe>
         </div>
         
         <div class="game-description">
@@ -163,75 +99,5 @@
             <a href="index.html" class="back-button">Back to Menu</a>
         </div>
     </div>
-    
-    <script type="text/javascript">
-        // Initialize loading variables
-        let loadingProgress = document.getElementById('loading-progress');
-        let loadingText = document.getElementById('loading-text');
-        let loadingContainer = document.getElementById('loading-container');
-        
-        // Simulate loading progress
-        let progress = 0;
-        let loadingInterval = setInterval(function() {
-            progress += 5;
-            if (progress > 95) {
-                clearInterval(loadingInterval);
-            }
-            loadingProgress.style.width = progress + '%';
-            loadingText.textContent = 'Loading game files... ' + progress + '%';
-        }, 200);
-        
-        // Load the game script dynamically
-        function loadGame() {
-            let gameScript = document.createElement('script');
-            gameScript.src = 'Run/Run3.js';
-            gameScript.onload = function() {
-                // Script loaded successfully
-                clearInterval(loadingInterval);
-                loadingProgress.style.width = '100%';
-                loadingText.textContent = 'Game loaded! Starting...';
-                
-                // Short delay before initializing the game
-                setTimeout(function() {
-                    // Try to initialize the game
-                    if (typeof lime !== 'undefined' && lime.embed) {
-                        try {
-                            lime.embed("Run3", "openfl-content", 800, 600, { parameters: {} });
-                            console.log("Game initialized successfully");
-                            // Hide loading screen after successful initialization
-                            loadingContainer.style.display = 'none';
-                        } catch (e) {
-                            console.error("Error initializing game:", e);
-                            showError("Game could not be initialized. Please try a different browser.");
-                        }
-                    } else {
-                        console.error("Lime object not available");
-                        showError("Game engine could not load properly. Please try a different browser.");
-                    }
-                }, 500);
-            };
-            
-            gameScript.onerror = function() {
-                clearInterval(loadingInterval);
-                showError("Failed to load game resources. Please check your internet connection and try again.");
-            };
-            
-            document.body.appendChild(gameScript);
-        }
-        
-        // Display error message
-        function showError(message) {
-            loadingContainer.innerHTML = `
-                <div style="padding: 20px; text-align: center;">
-                    <h2>Error Loading Game</h2>
-                    <p>${message}</p>
-                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; border: none; color: white; border-radius: 5px; cursor: pointer;">Try Again</button>
-                </div>
-            `;
-        }
-        
-        // Start loading the game
-        window.addEventListener('load', loadGame);
-    </script>
 </body>
 </html> 
