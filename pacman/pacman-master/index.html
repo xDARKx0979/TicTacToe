@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Pacman</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <script src="../../theme.js"></script>
+    
+    <style type="text/css">
+      @font-face {
+	    font-family: 'BDCartoonShoutRegular';
+        src: url('BD_Cartoon_Shout-webfont.ttf') format('truetype');
+	    font-weight: normal;
+	    font-style: normal;
+      }
+      #pacman {
+        height: 450px;
+        width: 342px;
+        margin: 20px auto;
+        box-shadow: 0 0 20px var(--shadow-color);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      #shim { 
+        font-family: BDCartoonShoutRegular; 
+        position: absolute;
+        visibility: hidden;
+      }
+      h1 { 
+        font-family: BDCartoonShoutRegular; 
+        text-align: center; 
+        color: var(--text-color);
+        margin-bottom: 30px;
+        font-size: 2.5em;
+      }
+      body { 
+        width: 100%;
+        max-width: 900px; 
+        margin: 0px auto; 
+        font-family: sans-serif; 
+        background-color: var(--background-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease;
+        padding: 20px;
+      }
+      .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--container-bg);
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 0 15px var(--shadow-color);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      .button-container {
+        margin-top: 30px;
+        text-align: center;
+      }
+      .back-button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #f44336;
+        color: white;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .back-button:hover {
+        background-color: #d32f2f;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+      .instructions {
+        margin: 20px auto;
+        padding: 15px;
+        background-color: var(--info-bg);
+        border-radius: 5px;
+        max-width: 600px;
+        line-height: 1.5;
+        transition: background-color 0.3s ease;
+      }
+      .instructions h2 {
+        margin-bottom: 10px;
+        color: var(--text-color);
+      }
+      .instructions p {
+        margin-bottom: 10px;
+      }
+      .key {
+        display: inline-block;
+        padding: 3px 8px;
+        background-color: var(--button-bg);
+        border-radius: 3px;
+        margin: 0 3px;
+        font-family: monospace;
+        font-weight: bold;
+      }
+      @media screen and (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        #pacman {
+          width: 100%;
+          max-width: 342px;
+          height: auto;
+          aspect-ratio: 342/450;
+        }
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <div class="game-container">
+      <div id="shim">shim for font face</div>
+      <h1>HTML5 Pacman</h1>
+      
+      <div id="pacman"></div>
+      
+      <div class="instructions">
+        <h2>How to Play</h2>
+        <p>Use the <span class="key">←</span> <span class="key">→</span> <span class="key">↑</span> <span class="key">↓</span> arrow keys to navigate through the maze.</p>
+        <p>Eat all the dots while avoiding the ghosts. Power pellets in the corners let you eat the ghosts temporarily.</p>
+      </div>
+      
+      <div class="button-container">
+        <a href="../../index.html" class="back-button">Back to Menu</a>
+      </div>
+    </div>
+    
+    <script src="modernizr-1.5.min.js"></script>
+    <script src="pacman.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var el = document.getElementById("pacman");
+        
+        if (Modernizr.canvas && Modernizr.localstorage && 
+            Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
+          // Load pacman with a slight delay to ensure DOM is fully ready
+          setTimeout(function() { 
+            PACMAN.init(el, "./");
+          }, 100);
+        } else { 
+          el.innerHTML = "Sorry, needs a decent browser<br /><small>" + 
+            "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
+        }
+      });
+    </script>
+  </body>
+</html>

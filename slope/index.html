@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Slope Game</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="Slope-Game-main/TemplateData/style.css">
+    <script src="Slope-Game-main/TemplateData/UnityProgress.js"></script>
+    <script src="Slope-Game-main/TemplateData/unityloader41.js"></script>
+    <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "Slope-Game-main/Build/slope.json", { onProgress: UnityProgress, Module: { onRuntimeInitialized: function() { UnityProgress(gameInstance, "complete") } } });
+    </script>
+    <style>
+      body { 
+        margin: 0; 
+        padding: 0;
+        background-color: #111;
+      }
+      .back-link {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 999;
+      }
+      .back-button {
+        padding: 10px 20px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .back-button:hover {
+        background-color: #d32f2f;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="back-link">
+      <a href="../index.html" class="back-button">Back to Menu</a>
+    </div>
+    <div class="webgl-content">
+      <div id="gameContainer" style="width: 100vw; height: 100vh; margin: 0;"></div>
+      <div class="footer">
+        <div class="webgl-logo"></div>
+        <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+        <div class="title">Slope</div>
+      </div>
+    </div>
+  </body>
+</html> 
