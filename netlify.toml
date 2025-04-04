@@ -1,0 +1,15 @@
+[build]
+  publish = "/"
+  command = "# no build command"
+
+[context.production]
+  publish = "/"
+  command = "# no build command"
+
+[context.deploy-preview]
+  publish = "/"
+  command = "# no build command"
+
+[context.branch-deploy]
+  publish = "/"
+  command = "# no build command" 
