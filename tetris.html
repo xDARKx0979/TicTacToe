@@ -6,6 +6,53 @@
     <title>Tetris</title>
     <link rel="stylesheet" href="styles.css">
     <script src="theme.js"></script>
+    <style>
+        .secret-code {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 100;
+            font-size: 12px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+        
+        .secret-code:hover {
+            opacity: 1;
+        }
+        
+        .code-input {
+            position: absolute;
+            bottom: 40px;
+            left: 10px;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .code-input input {
+            width: 70px;
+            padding: 5px;
+            background-color: #222;
+            border: 1px solid #555;
+            color: white;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .code-input button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
 </head>
 <body>
     <div class="container tetris-container">
@@ -28,12 +75,21 @@
                 <canvas id="next-piece" width="100" height="100"></canvas>
             </div>
         </div>
-        <canvas id="tetris" width="300" height="600"></canvas>
-        
-        <!-- Floating score display -->
-        <div class="floating-score">
-            <div>SCORE</div>
-            <div id="floating-score" class="floating-score-value">0</div>
+        <div style="position: relative;">
+            <canvas id="tetris" width="300" height="600"></canvas>
+            
+            <!-- Secret code toggle and input -->
+            <div class="secret-code" id="code-toggle">⚙️</div>
+            <div class="code-input" id="code-input-container">
+                <input type="text" id="code-input" maxlength="4" placeholder="Code">
+                <button id="code-submit">OK</button>
+            </div>
+            
+            <!-- Floating score display -->
+            <div class="floating-score">
+                <div>SCORE</div>
+                <div id="floating-score" class="floating-score-value">0</div>
+            </div>
         </div>
         
         <div class="controls">

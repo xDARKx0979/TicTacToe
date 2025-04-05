@@ -30,6 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let holdPiece = null;
     let canHold = true;
     
+    // Secret code variables
+    let secretCodeActive = false;
+    const secretCode = '7362';
+    
     // Initialize the board
     const board = createMatrix(COLS, ROWS);
     
@@ -321,13 +325,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nextPiece) {
             player.matrix = nextPiece;
         } else {
-            const pieces = 'IJLOSTZ';
-            player.matrix = createPiece(pieces.length * Math.random() | 0);
+            if (secretCodeActive) {
+                // Only create I pieces when secret code is active
+                player.matrix = createPiece(0); // I piece is index 0
+            } else {
+                const pieces = 'IJLOSTZ';
+                player.matrix = createPiece(pieces.length * Math.random() | 0);
+            }
         }
         
         // Generate new next piece
-        const pieces = 'IJLOSTZ';
-        nextPiece = createPiece(pieces.length * Math.random() | 0);
+        if (secretCodeActive) {
+            // Only create I pieces when secret code is active
+            nextPiece = createPiece(0); // I piece is index 0
+        } else {
+            const pieces = 'IJLOSTZ';
+            nextPiece = createPiece(pieces.length * Math.random() | 0);
+        }
         
         // Position the piece at the top center
         player.pos.y = 0;
@@ -351,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             score = 0;
             level = 1;
             holdPiece = null;
+            secretCodeActive = false;
             updateScoreDisplay();
         }
     }
@@ -511,6 +526,39 @@ document.addEventListener('DOMContentLoaded', () => {
     
     startButton.addEventListener('click', startGame);
     pauseButton.addEventListener('click', togglePause);
+    
+    // Secret code functionality
+    const codeToggle = document.getElementById('code-toggle');
+    const codeInputContainer = document.getElementById('code-input-container');
+    const codeInput = document.getElementById('code-input');
+    const codeSubmit = document.getElementById('code-submit');
+    
+    // Toggle code input visibility
+    codeToggle.addEventListener('click', () => {
+        codeInputContainer.style.display = 
+            codeInputContainer.style.display === 'none' || 
+            codeInputContainer.style.display === '' ? 'block' : 'none';
+    });
+    
+    // Handle code submission
+    codeSubmit.addEventListener('click', () => {
+        const inputCode = codeInput.value.trim();
+        if (inputCode === secretCode) {
+            secretCodeActive = true;
+            alert('Secret code activated! Only I pieces will drop.');
+        } else {
+            secretCodeActive = false;
+        }
+        codeInput.value = '';
+        codeInputContainer.style.display = 'none';
+    });
+    
+    // Allow enter key to submit code
+    codeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            codeSubmit.click();
+        }
+    });
     
     // Initial draw
     draw();
