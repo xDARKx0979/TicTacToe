@@ -354,4 +354,45 @@ button:disabled {
         flex-direction: column;
         align-items: center;
     }
+}
+
+/* Support Button */
+.support-button {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background-color: #F96854; /* Patreon color */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.support-button:hover {
+    background-color: #E64A47;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.support-button svg {
+    margin-right: 8px;
+    height: 18px;
+    width: 18px;
+}
+
+/* Dark theme support button */
+[data-theme="dark"] .support-button {
+    background-color: #F96854;
+    color: white;
+}
+
+[data-theme="dark"] .support-button:hover {
+    background-color: #E64A47;
 } 
