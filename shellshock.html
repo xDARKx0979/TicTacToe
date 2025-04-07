@@ -13,8 +13,6 @@
             height: 100%;
             overflow: hidden;
             background-color: #121212;
-            color: white;
-            font-family: Arial, sans-serif;
         }
         .game-container {
             position: fixed;
@@ -48,27 +46,6 @@
         .hidden {
             display: none;
         }
-        .loading-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 900;
-        }
-        .direct-link {
-            margin-top: 20px;
-            display: inline-block;
-            padding: 15px 30px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .direct-link:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
@@ -76,24 +53,12 @@
         <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
         <button class="button" onclick="switchGameSource(0)">Server 1</button>
         <button class="button" onclick="switchGameSource(1)">Server 2</button>
-        <button class="button" onclick="switchGameSource(2)">Server 3</button>
-        <button class="button" onclick="switchGameSource(3)">Server 4</button>
     </div>
     
-    <div class="loading-message" id="loading-message">
-        <h2>Loading Shell Shockers...</h2>
-        <p>If the game doesn't load in a few seconds, try a different server or click below:</p>
-        <a href="https://shellshock.io/" target="_blank" class="direct-link">Play Shell Shockers</a>
-    </div>
-    
-    <!-- Multiple iframes with different sources, only one visible at a time -->
+    <!-- Only two iframes with the working sources -->
     <iframe id="game-frame-0" src="https://shellshock.io/" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
     
     <iframe id="game-frame-1" src="https://eggwars.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
-    
-    <iframe id="game-frame-2" src="https://play.eggcombat.com/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
-    
-    <iframe id="game-frame-3" src="https://yolk.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
 
     <script>
         // Current active frame
@@ -112,14 +77,6 @@
             
             // Try to focus the frame
             document.getElementById(`game-frame-${frameIndex}`).focus();
-            
-            // Show loading message
-            document.getElementById('loading-message').style.display = 'block';
-            
-            // Hide loading message after 5 seconds
-            setTimeout(function() {
-                document.getElementById('loading-message').style.display = 'none';
-            }, 5000);
         }
         
         function toggleFullscreen() {
@@ -144,34 +101,10 @@
             }
         }
         
-        // Try to detect if the game has loaded
-        function checkGameLoaded(frameIndex) {
-            try {
-                const frame = document.getElementById(`game-frame-${frameIndex}`);
-                const frameDoc = frame.contentDocument || frame.contentWindow.document;
-                
-                // If we can access the document, the game might be loaded
-                if (frameDoc && frameDoc.body) {
-                    // Check if there are elements in the body
-                    if (frameDoc.body.children.length > 0) {
-                        document.getElementById('loading-message').style.display = 'none';
-                    }
-                }
-            } catch (e) {
-                // Cannot access iframe content, might be due to same-origin policy
-                console.log("Cannot access iframe content:", e);
-            }
-        }
-        
         // On page load
         window.onload = function() {
             // Initialize with the first frame
             switchGameSource(0);
-            
-            // Check periodically if the game has loaded
-            setInterval(function() {
-                checkGameLoaded(activeFrame);
-            }, 1000);
             
             // For server 1, try to bypass restrictions
             setTimeout(function() {
