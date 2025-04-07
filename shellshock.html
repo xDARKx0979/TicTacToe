@@ -3,252 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <title>Shell Shockers</title>
+    <title>Shell Shockers Access Guide</title>
     <style>
-        body, html {
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
             margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #121212;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
         }
-        .game-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+        }
+        .method {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        .method h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .qr {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr img {
+            max-width: 200px;
         }
         .button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
+            display: inline-block;
+            background-color: #3498db;
             color: white;
-            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+            margin-top: 10px;
             transition: background-color 0.3s;
         }
         .button:hover {
-            background-color: #45a049;
+            background-color: #2980b9;
         }
-        .hidden {
-            display: none;
-        }
-        .proxy-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 2000;
-            display: none;
-            text-align: center;
-            max-width: 500px;
-            color: white;
-        }
-        .proxy-btn {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
+        .note {
+            background-color: #ffe9e9;
+            padding: 10px 15px;
             border-radius: 5px;
-            cursor: pointer;
+            margin: 15px 0;
+            border-left: 5px solid #e74c3c;
         }
-        .proxy-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 20px;
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+        .back-btn {
+            display: block;
+            margin: 20px auto;
+            width: 120px;
         }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
-        <button class="button" onclick="switchGameSource(0)">Server 1</button>
-        <button class="button" onclick="switchGameSource(1)">Server 2</button>
-        <button class="button" onclick="switchGameSource(2)">Server 3</button>
-        <button class="button" onclick="switchGameSource(3)">Server 4</button>
-        <button class="button" onclick="switchGameSource(4)">Server 5</button>
-        <button class="button" onclick="showProxyOptions()">Proxy Options</button>
-    </div>
-    
-    <!-- Using alternative hosted versions of Shell Shockers -->
-    <iframe id="game-frame-0" src="https://staging.shelley.wbst.app/shell-shockers/" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
-    
-    <iframe id="game-frame-1" src="https://script.google.com/macros/s/AKfycbxC3f5dRfbCjUiN-xnA3-A5Vw2x65zg-YkS5ORnqpWTKRyMjDI/exec" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
-    
-    <iframe id="game-frame-2" src="https://learningpotential.gq/games/shellshockers/play" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
-
-    <iframe id="game-frame-3" src="https://outred.github.io/shellshockers/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
-
-    <iframe id="game-frame-4" src="https://xlegends.github.io/shellshockers/shellshock.html" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
-
-    <!-- Proxy Options Dialog -->
-    <div id="proxy-dialog" class="proxy-container">
-        <span class="proxy-close" onclick="hideProxyOptions()">✕</span>
-        <h3>Web Proxy Options</h3>
-        <p>Select a proxy to connect to Shell Shockers:</p>
-        <button class="proxy-btn" onclick="useSchoolBypass()">School Bypass Method</button>
-        <button class="proxy-btn" onclick="useGoogleAPPsMethod()">Google Apps Method</button>
-        <button class="proxy-btn" onclick="useCustom()">Enter Custom Proxy URL</button>
-        <div id="custom-input" style="margin-top: 15px; display: none;">
-            <input type="text" id="custom-proxy-url" placeholder="Enter custom proxy URL" style="padding: 8px; width: 80%;">
-            <button class="proxy-btn" style="margin-top: 5px;" onclick="applyCustomProxy()">Apply</button>
+    <div class="container">
+        <h1>How to Access Shell Shockers</h1>
+        
+        <p>Due to content filtering in many schools and workplaces, direct access to Shell Shockers through iframes is often blocked. Here are several methods that might work in restricted environments:</p>
+        
+        <div class="note">
+            <strong>Note:</strong> These methods are provided for educational purposes only. Always follow your organization's acceptable use policies.
         </div>
+        
+        <div class="method">
+            <h3>Method 1: URL Shortener Access</h3>
+            <p>Some filtering systems only block known game URLs. Try using these shortened URLs that redirect to Shell Shockers:</p>
+            <ul>
+                <li><a href="https://tinyurl.com/eggshockers" target="_blank">tinyurl.com/eggshockers</a></li>
+                <li><a href="https://bit.ly/shellgame2024" target="_blank">bit.ly/shellgame2024</a></li>
+            </ul>
+        </div>
+        
+        <div class="method">
+            <h3>Method 2: Alternative Domain Names</h3>
+            <p>Shell Shockers can be accessed through multiple domain names that might not be blocked:</p>
+            <ul>
+                <li><a href="https://shellshock.io" target="_blank">shellshock.io</a> (official site)</li>
+                <li><a href="https://egg.io" target="_blank">egg.io</a> (redirects to shell shockers)</li>
+                <li><a href="https://yolk.io" target="_blank">yolk.io</a> (alternate domain)</li>
+                <li><a href="https://eggcombat.com" target="_blank">eggcombat.com</a> (alternate domain)</li>
+            </ul>
+        </div>
+        
+        <div class="method">
+            <h3>Method 3: Mobile Hotspot</h3>
+            <p>If you have a smartphone with a data plan, you can:</p>
+            <ol>
+                <li>Enable your phone's hotspot feature</li>
+                <li>Connect your computer to the phone's WiFi</li>
+                <li>Access Shell Shockers directly through your phone's data connection</li>
+            </ol>
+        </div>
+        
+        <div class="method">
+            <h3>Method 4: Google Translate Proxy</h3>
+            <p>Google Translate can sometimes be used as a basic web proxy:</p>
+            <ol>
+                <li>Go to <a href="https://translate.google.com" target="_blank">Google Translate</a></li>
+                <li>In the URL box on the right, enter: <code>https://shellshock.io</code></li>
+                <li>Click on the link that appears to view the site through Google Translate</li>
+            </ol>
+        </div>
+        
+        <div class="method">
+            <h3>Method 5: Chrome Extension Proxies</h3>
+            <p>If you can install Chrome extensions, these might help bypass restrictions:</p>
+            <ul>
+                <li>Ultrasurf: <a href="https://chrome.google.com/webstore/detail/ultrasurf-security-privac/mjnbclmflcpookeapghfhapeffmpodij" target="_blank">Chrome Web Store Link</a></li>
+                <li>Hoxx VPN: <a href="https://chrome.google.com/webstore/detail/hoxx-vpn-proxy/nbcojefnccbanplpoffopkoepjmhgdgh" target="_blank">Chrome Web Store Link</a></li>
+            </ul>
+            <p>After installing, enable the extension and then visit shellshock.io</p>
+        </div>
+        
+        <div class="method">
+            <h3>Method 6: Custom Proxy (Advanced)</h3>
+            <p>If you have access to a home computer, you can set up your own proxy server:</p>
+            <ol>
+                <li>Set up a proxy server at home using software like <a href="https://www.torproject.org/" target="_blank">Tor</a></li>
+                <li>Configure a browser to use your home proxy</li>
+                <li>Access Shell Shockers through your unfiltered home connection</li>
+            </ol>
+        </div>
+        
+        <a href="index.html" class="button back-btn">← Back to Games</a>
     </div>
-
-    <script>
-        // Current active frame
-        let activeFrame = 0;
-        
-        // Function to switch between game sources
-        function switchGameSource(frameIndex) {
-            // Hide all frames
-            document.querySelectorAll('.game-container').forEach(frame => {
-                frame.classList.add('hidden');
-            });
-            
-            // Show the selected frame
-            document.getElementById(`game-frame-${frameIndex}`).classList.remove('hidden');
-            activeFrame = frameIndex;
-            
-            // Try to focus the frame
-            document.getElementById(`game-frame-${frameIndex}`).focus();
-        }
-        
-        function toggleFullscreen() {
-            const elem = document.documentElement;
-            
-            if (!document.fullscreenElement) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) { /* Safari */
-                    elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) { /* IE11 */
-                    elem.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            }
-        }
-        
-        function showProxyOptions() {
-            document.getElementById('proxy-dialog').style.display = 'block';
-        }
-        
-        function hideProxyOptions() {
-            document.getElementById('proxy-dialog').style.display = 'none';
-            document.getElementById('custom-input').style.display = 'none';
-        }
-        
-        function useSchoolBypass() {
-            // Create a new iframe for School Bypass
-            const newFrame = document.createElement('iframe');
-            newFrame.id = 'game-frame-school-bypass';
-            newFrame.className = 'game-container';
-            newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
-            newFrame.allowFullscreen = true;
-            newFrame.src = 'https://educationbluesky.com/play/shellshock/';
-            
-            // Add it to the page
-            document.body.appendChild(newFrame);
-            
-            // Switch to the new frame
-            document.querySelectorAll('.game-container').forEach(frame => {
-                frame.classList.add('hidden');
-            });
-            newFrame.classList.remove('hidden');
-            
-            // Hide the dialog
-            hideProxyOptions();
-        }
-        
-        function useGoogleAPPsMethod() {
-            // Create a new iframe for Google Apps
-            const newFrame = document.createElement('iframe');
-            newFrame.id = 'game-frame-google';
-            newFrame.className = 'game-container';
-            newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
-            newFrame.allowFullscreen = true;
-            newFrame.src = 'https://docs.google.com/document/d/1ijSQj4rZkv7DxQTCXxwTS3l5P8Ff6ZwG6wgI80L6Nj4/preview';
-            
-            // Add it to the page
-            document.body.appendChild(newFrame);
-            
-            // Switch to the new frame
-            document.querySelectorAll('.game-container').forEach(frame => {
-                frame.classList.add('hidden');
-            });
-            newFrame.classList.remove('hidden');
-            
-            // Hide the dialog
-            hideProxyOptions();
-        }
-        
-        function useCustom() {
-            document.getElementById('custom-input').style.display = 'block';
-        }
-        
-        function applyCustomProxy() {
-            const customUrl = document.getElementById('custom-proxy-url').value.trim();
-            if (customUrl) {
-                // Create a new iframe for the custom proxy
-                const newFrame = document.createElement('iframe');
-                newFrame.id = 'game-frame-custom';
-                newFrame.className = 'game-container';
-                newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
-                newFrame.allowFullscreen = true;
-                newFrame.src = customUrl;
-                
-                // Add it to the page
-                document.body.appendChild(newFrame);
-                
-                // Switch to the new frame
-                document.querySelectorAll('.game-container').forEach(frame => {
-                    frame.classList.add('hidden');
-                });
-                newFrame.classList.remove('hidden');
-                
-                // Hide the dialog
-                hideProxyOptions();
-            }
-        }
-        
-        // On page load
-        window.onload = function() {
-            // Initialize with the first frame
-            switchGameSource(0);
-            
-            // Add performance attributes to help loading
-            document.querySelectorAll('.game-container').forEach(frame => {
-                // Add custom attributes to help bypass restrictions
-                frame.setAttribute('loading', 'eager');
-                frame.setAttribute('importance', 'high');
-            });
-        };
-    </script>
 </body>
 </html> 
