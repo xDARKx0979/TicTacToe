@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <!-- Allow mixed content -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Slither.io</title>
     <style>
         body, html {
@@ -50,6 +53,40 @@
         .button:hover {
             background-color: #45a049;
         }
+        .fallback {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            z-index: 100;
+            max-width: 80%;
+        }
+        .fallback h2 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .fallback-button {
+            display: inline-block;
+            margin: 15px 5px;
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .fallback-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -58,14 +95,22 @@
             <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
         </div>
         <iframe 
-            src="http://slither.com/io" 
+            src="https://slither.io" 
             class="game-frame" 
+            id="game-frame"
             allowfullscreen="true"
             frameborder="0"
             scrolling="no"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-modals"
         ></iframe>
+    </div>
+
+    <div class="fallback" id="fallback">
+        <h2>Slither.io</h2>
+        <p>We're having trouble loading the game directly in this page due to security restrictions.</p>
+        <button class="fallback-button" onclick="openInNewTab()">Open in New Tab</button>
+        <p>For the best experience, we recommend playing directly on Slither.io.</p>
     </div>
 
     <script>
@@ -90,9 +135,41 @@
             }
         }
         
+        function openInNewTab() {
+            window.open('https://slither.io', '_blank');
+        }
+        
         // Try to focus the iframe to allow keyboard controls
         window.onload = function() {
-            document.querySelector('.game-frame').focus();
+            const iframe = document.querySelector('.game-frame');
+            iframe.focus();
+            
+            // Check if iframe loaded properly
+            iframe.onload = function() {
+                try {
+                    // Try to access iframe content
+                    const frameContent = iframe.contentWindow.document;
+                    // If we get here, iframe loaded properly
+                } catch (e) {
+                    // If we can't access the iframe content, show fallback
+                    document.getElementById('fallback').style.display = 'block';
+                }
+            };
+            
+            // Set a timeout to check if the game has loaded
+            setTimeout(function() {
+                try {
+                    const frameContent = iframe.contentWindow.document;
+                    // Check if we got an error page
+                    if (frameContent.title.includes('Error') || 
+                        frameContent.body.innerText.includes('refused') ||
+                        frameContent.body.innerText.includes('blocked')) {
+                        document.getElementById('fallback').style.display = 'block';
+                    }
+                } catch (e) {
+                    document.getElementById('fallback').style.display = 'block';
+                }
+            }, 5000);
         };
     </script>
 </body>
