@@ -27,7 +27,7 @@
             align-items: center;
             justify-content: center;
         }
-        .game-frame {
+        .game-object {
             width: 100%;
             height: 100%;
             border: none;
@@ -87,6 +87,15 @@
         .fallback-button:hover {
             background-color: #45a049;
         }
+        #direct-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        #direct-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -94,23 +103,20 @@
         <div class="controls">
             <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
         </div>
-        <iframe 
-            src="http://slither.com/io" 
-            class="game-frame" 
-            id="game-frame"
-            allowfullscreen="true"
-            frameborder="0"
-            scrolling="no"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-modals"
-        ></iframe>
+        <object 
+            type="text/html" 
+            data="https://slither.io"
+            class="game-object" 
+            id="game-object">
+            <p>Unable to load the game</p>
+        </object>
     </div>
 
     <div class="fallback" id="fallback">
         <h2>Slither.io</h2>
-        <p>We're having trouble loading the game directly in this page due to security restrictions.</p>
-        <button class="fallback-button" onclick="openInNewTab()">Open in New Tab</button>
-        <p>For the best experience, we recommend playing directly on Slither.io.</p>
+        <p>We're having trouble loading the game directly due to website restrictions.</p>
+        <button class="fallback-button" onclick="openInNewTab('https://slither.io')">Play Slither.io</button>
+        <a id="direct-link" href="https://slither.io" target="_blank">Or click here to open the game</a>
     </div>
 
     <script>
@@ -135,42 +141,34 @@
             }
         }
         
-        function openInNewTab() {
-            window.open('http://slither.com/io', '_blank');
+        function openInNewTab(url) {
+            window.open(url, '_blank');
         }
         
-        // Show fallback on load since the site doesn't exist
+        // Check if the object loads properly
         window.onload = function() {
-            // First try to load the iframe
-            const iframe = document.querySelector('.game-frame');
-            iframe.focus();
+            const gameObject = document.getElementById('game-object');
             
-            // Check if iframe loaded properly
-            iframe.onload = function() {
+            // Set a timeout to check if the game loaded
+            setTimeout(function() {
                 try {
-                    // Try to access iframe content
-                    const frameContent = iframe.contentWindow.document;
-                    // If we can access the content, check if it's an error page
-                    if (frameContent.body.innerText.includes('not found') || 
-                        frameContent.body.innerText.includes('refused') ||
-                        frameContent.body.innerText.includes('blocked') ||
-                        frameContent.body.innerText.includes('error')) {
+                    // Try to check if the game is loaded
+                    const width = gameObject.offsetWidth;
+                    const height = gameObject.offsetHeight;
+                    
+                    // If dimensions are too small, game probably didn't load properly
+                    if (width < 50 || height < 50) {
                         document.getElementById('fallback').style.display = 'block';
                     }
                 } catch (e) {
-                    // If we can't access the iframe content, show fallback
                     document.getElementById('fallback').style.display = 'block';
                 }
-            };
+            }, 5000);
             
-            // Set a timeout to check if the game has loaded
-            setTimeout(function() {
-                try {
-                    const frameContent = iframe.contentWindow.document;
-                } catch (e) {
-                    document.getElementById('fallback').style.display = 'block';
-                }
-            }, 3000);
+            // Add an error handler
+            gameObject.onerror = function() {
+                document.getElementById('fallback').style.display = 'block';
+            };
         };
     </script>
 </body>
