@@ -99,8 +99,8 @@
         <span class="proxy-close" onclick="hideProxyOptions()">✕</span>
         <h3>Web Proxy Options</h3>
         <p>Select a proxy to connect to Shell Shockers:</p>
-        <button class="proxy-btn" onclick="useHolyUnblocker()">Holy Unblocker Proxy</button>
-        <button class="proxy-btn" onclick="useRammerhead()">Rammerhead Proxy</button>
+        <button class="proxy-btn" onclick="useIncognitoProxy()">Incognito Proxy</button>
+        <button class="proxy-btn" onclick="useTitaniumProxy()">Titanium Network</button>
         <button class="proxy-btn" onclick="useCustom()">Enter Custom Proxy URL</button>
         <div id="custom-input" style="margin-top: 15px; display: none;">
             <input type="text" id="custom-proxy-url" placeholder="Enter custom proxy URL" style="padding: 8px; width: 80%;">
@@ -158,14 +158,14 @@
             document.getElementById('custom-input').style.display = 'none';
         }
         
-        function useHolyUnblocker() {
-            // Create a new iframe for Holy Unblocker
+        function useIncognitoProxy() {
+            // Create a new iframe for Incognito
             const newFrame = document.createElement('iframe');
-            newFrame.id = 'game-frame-holy';
+            newFrame.id = 'game-frame-incognito';
             newFrame.className = 'game-container';
             newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
             newFrame.allowFullscreen = true;
-            newFrame.src = 'https://mathsspot.com/app/uv/service/hvtrs8%2F-sleltslomkeps%2Cim';
+            newFrame.src = 'https://incoggames.github.io/shell-shockers/';
             
             // Add it to the page
             document.body.appendChild(newFrame);
@@ -180,14 +180,14 @@
             hideProxyOptions();
         }
         
-        function useRammerhead() {
-            // Create a new iframe for Rammerhead
+        function useTitaniumProxy() {
+            // Create a new iframe for Titanium Network
             const newFrame = document.createElement('iframe');
-            newFrame.id = 'game-frame-rammerhead';
+            newFrame.id = 'game-frame-titanium';
             newFrame.className = 'game-container';
             newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
             newFrame.allowFullscreen = true;
-            newFrame.src = 'https://clevercode.wtf/service/hvtrs8%2F-sleltslomkeps%2Cim';
+            newFrame.src = 'https://f.edu-games.org/play-shell-shockers/';
             
             // Add it to the page
             document.body.appendChild(newFrame);
