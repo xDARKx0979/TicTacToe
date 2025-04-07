@@ -46,6 +46,36 @@
         .hidden {
             display: none;
         }
+        .proxy-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 2000;
+            display: none;
+            text-align: center;
+            max-width: 500px;
+            color: white;
+        }
+        .proxy-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .proxy-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
@@ -54,6 +84,7 @@
         <button class="button" onclick="switchGameSource(0)">Server 1</button>
         <button class="button" onclick="switchGameSource(1)">Server 2</button>
         <button class="button" onclick="switchGameSource(2)">Server 3</button>
+        <button class="button" onclick="showProxyOptions()">Proxy Options</button>
     </div>
     
     <!-- Using alternative hosted versions of Shell Shockers -->
@@ -62,6 +93,20 @@
     <iframe id="game-frame-1" src="https://topvazstore.github.io/g/shellshock" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
     
     <iframe id="game-frame-2" src="https://smartfoloolpuzzle.github.io/eggs/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
+
+    <!-- Proxy Options Dialog -->
+    <div id="proxy-dialog" class="proxy-container">
+        <span class="proxy-close" onclick="hideProxyOptions()">✕</span>
+        <h3>Web Proxy Options</h3>
+        <p>Select a proxy to connect to Shell Shockers:</p>
+        <button class="proxy-btn" onclick="useHolyUnblocker()">Holy Unblocker Proxy</button>
+        <button class="proxy-btn" onclick="useRammerhead()">Rammerhead Proxy</button>
+        <button class="proxy-btn" onclick="useCustom()">Enter Custom Proxy URL</button>
+        <div id="custom-input" style="margin-top: 15px; display: none;">
+            <input type="text" id="custom-proxy-url" placeholder="Enter custom proxy URL" style="padding: 8px; width: 80%;">
+            <button class="proxy-btn" style="margin-top: 5px;" onclick="applyCustomProxy()">Apply</button>
+        </div>
+    </div>
 
     <script>
         // Current active frame
@@ -101,6 +146,88 @@
                 } else if (document.msExitFullscreen) {
                     document.msExitFullscreen();
                 }
+            }
+        }
+        
+        function showProxyOptions() {
+            document.getElementById('proxy-dialog').style.display = 'block';
+        }
+        
+        function hideProxyOptions() {
+            document.getElementById('proxy-dialog').style.display = 'none';
+            document.getElementById('custom-input').style.display = 'none';
+        }
+        
+        function useHolyUnblocker() {
+            // Create a new iframe for Holy Unblocker
+            const newFrame = document.createElement('iframe');
+            newFrame.id = 'game-frame-holy';
+            newFrame.className = 'game-container';
+            newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
+            newFrame.allowFullscreen = true;
+            newFrame.src = 'https://mathsspot.com/app/uv/service/hvtrs8%2F-sleltslomkeps%2Cim';
+            
+            // Add it to the page
+            document.body.appendChild(newFrame);
+            
+            // Switch to the new frame
+            document.querySelectorAll('.game-container').forEach(frame => {
+                frame.classList.add('hidden');
+            });
+            newFrame.classList.remove('hidden');
+            
+            // Hide the dialog
+            hideProxyOptions();
+        }
+        
+        function useRammerhead() {
+            // Create a new iframe for Rammerhead
+            const newFrame = document.createElement('iframe');
+            newFrame.id = 'game-frame-rammerhead';
+            newFrame.className = 'game-container';
+            newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
+            newFrame.allowFullscreen = true;
+            newFrame.src = 'https://clevercode.wtf/service/hvtrs8%2F-sleltslomkeps%2Cim';
+            
+            // Add it to the page
+            document.body.appendChild(newFrame);
+            
+            // Switch to the new frame
+            document.querySelectorAll('.game-container').forEach(frame => {
+                frame.classList.add('hidden');
+            });
+            newFrame.classList.remove('hidden');
+            
+            // Hide the dialog
+            hideProxyOptions();
+        }
+        
+        function useCustom() {
+            document.getElementById('custom-input').style.display = 'block';
+        }
+        
+        function applyCustomProxy() {
+            const customUrl = document.getElementById('custom-proxy-url').value.trim();
+            if (customUrl) {
+                // Create a new iframe for the custom proxy
+                const newFrame = document.createElement('iframe');
+                newFrame.id = 'game-frame-custom';
+                newFrame.className = 'game-container';
+                newFrame.allow = 'autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera';
+                newFrame.allowFullscreen = true;
+                newFrame.src = customUrl;
+                
+                // Add it to the page
+                document.body.appendChild(newFrame);
+                
+                // Switch to the new frame
+                document.querySelectorAll('.game-container').forEach(frame => {
+                    frame.classList.add('hidden');
+                });
+                newFrame.classList.remove('hidden');
+                
+                // Hide the dialog
+                hideProxyOptions();
             }
         }
         
