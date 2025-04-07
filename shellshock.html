@@ -57,11 +57,11 @@
     </div>
     
     <!-- Using alternative hosted versions of Shell Shockers -->
-    <iframe id="game-frame-0" src="https://mathematics.gg/shell-shockers" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
+    <iframe id="game-frame-0" src="https://cohenerickson.github.io/radon-games-assets/src/gs/shell-shockers/index.html" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
     
-    <iframe id="game-frame-1" src="https://ubg98.github.io/shellshockers/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
+    <iframe id="game-frame-1" src="https://topvazstore.github.io/g/shellshock" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
     
-    <iframe id="game-frame-2" src="https://html5.gamemonetize.co/pvnfcftxh2k4o1vmjojx5do3c69bv50v/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
+    <iframe id="game-frame-2" src="https://smartfoloolpuzzle.github.io/eggs/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
 
     <script>
         // Current active frame
@@ -109,7 +109,7 @@
             // Initialize with the first frame
             switchGameSource(0);
             
-            // Remove sandbox attribute which may be causing issues
+            // Add performance attributes to help loading
             document.querySelectorAll('.game-container').forEach(frame => {
                 // Add custom attributes to help bypass restrictions
                 frame.setAttribute('loading', 'eager');
