@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Shell Shockers</title>
     <style>
         body, html {
@@ -41,15 +42,45 @@
         .button:hover {
             background-color: #45a049;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="controls">
         <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
+        <button class="button" onclick="switchGameSource(0)">Server 1</button>
+        <button class="button" onclick="switchGameSource(1)">Server 2</button>
+        <button class="button" onclick="switchGameSource(2)">Server 3</button>
     </div>
-    <iframe src="https://shellshock.io/" class="game-container" allowfullscreen></iframe>
+    
+    <!-- Multiple iframes with different sources, only one visible at a time -->
+    <iframe id="game-frame-0" src="https://shellshock.io/" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" referrerpolicy="no-referrer"></iframe>
+    
+    <iframe id="game-frame-1" src="https://eggwars.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" referrerpolicy="no-referrer"></iframe>
+    
+    <iframe id="game-frame-2" src="https://egg.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" referrerpolicy="no-referrer"></iframe>
 
     <script>
+        // Current active frame
+        let activeFrame = 0;
+        
+        // Function to switch between game sources
+        function switchGameSource(frameIndex) {
+            // Hide all frames
+            document.querySelectorAll('.game-container').forEach(frame => {
+                frame.classList.add('hidden');
+            });
+            
+            // Show the selected frame
+            document.getElementById(`game-frame-${frameIndex}`).classList.remove('hidden');
+            activeFrame = frameIndex;
+            
+            // Try to focus the frame
+            document.getElementById(`game-frame-${frameIndex}`).focus();
+        }
+        
         function toggleFullscreen() {
             const elem = document.documentElement;
             
@@ -71,6 +102,38 @@
                 }
             }
         }
+        
+        // Add event listener for window message events from the iframe
+        window.addEventListener('message', function(event) {
+            // Check if the message is from one of our game frames
+            const frame = document.getElementById(`game-frame-${activeFrame}`);
+            if (event.source === frame.contentWindow) {
+                // Process messages from the game frame if needed
+                console.log('Message from game:', event.data);
+            }
+        });
+        
+        // On page load
+        window.onload = function() {
+            // Initialize with the first frame
+            switchGameSource(0);
+            
+            // Try to prevent iframe detection methods
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.removedNodes.length > 0) {
+                        // Check if our frame was removed and add it back
+                        const currentFrame = document.getElementById(`game-frame-${activeFrame}`);
+                        if (!currentFrame) {
+                            location.reload();
+                        }
+                    }
+                });
+            });
+            
+            // Start observing document changes
+            observer.observe(document.body, { childList: true, subtree: true });
+        };
     </script>
 </body>
 </html> 
