@@ -53,12 +53,15 @@
         <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
         <button class="button" onclick="switchGameSource(0)">Server 1</button>
         <button class="button" onclick="switchGameSource(1)">Server 2</button>
+        <button class="button" onclick="switchGameSource(2)">Server 3</button>
     </div>
     
-    <!-- Only two iframes with the working sources -->
-    <iframe id="game-frame-0" src="https://shellshock.io/" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+    <!-- Using alternative hosted versions of Shell Shockers -->
+    <iframe id="game-frame-0" src="https://mathematics.gg/shell-shockers" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
     
-    <iframe id="game-frame-1" src="https://eggwars.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+    <iframe id="game-frame-1" src="https://ubg98.github.io/shellshockers/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
+    
+    <iframe id="game-frame-2" src="https://html5.gamemonetize.co/pvnfcftxh2k4o1vmjojx5do3c69bv50v/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera"></iframe>
 
     <script>
         // Current active frame
@@ -106,19 +109,12 @@
             // Initialize with the first frame
             switchGameSource(0);
             
-            // For server 1, try to bypass restrictions
-            setTimeout(function() {
-                const frame0 = document.getElementById('game-frame-0');
-                // Modify iframe attributes to help bypass restrictions
-                frame0.setAttribute('loading', 'eager');
-                frame0.setAttribute('importance', 'high');
-            }, 1000);
-            
-            // Try another approach for server 2
-            setTimeout(function() {
-                const frame1 = document.getElementById('game-frame-1');
-                frame1.setAttribute('importance', 'high');
-            }, 1000);
+            // Remove sandbox attribute which may be causing issues
+            document.querySelectorAll('.game-container').forEach(frame => {
+                // Add custom attributes to help bypass restrictions
+                frame.setAttribute('loading', 'eager');
+                frame.setAttribute('importance', 'high');
+            });
         };
     </script>
 </body>
