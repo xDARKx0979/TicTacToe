@@ -14,40 +14,81 @@
             min-height: 100vh;
             background-color: #1a1a1a;
             font-family: Arial, sans-serif;
+            flex-direction: column;
         }
         .game-container {
             position: relative;
             width: 100%;
             height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        iframe {
+        .game-frame {
             width: 100%;
             height: 100%;
             border: none;
         }
-        .fullscreen-btn {
+        .controls {
             position: fixed;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .button {
             padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            z-index: 1000;
             font-size: 16px;
             transition: background-color 0.3s;
         }
-        .fullscreen-btn:hover {
+        .button:hover {
             background-color: #45a049;
+        }
+        .direct-link {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        .direct-link.show {
+            display: block;
+        }
+        .direct-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .direct-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <iframe src="http://slither.com/io" allowfullscreen></iframe>
-        <button class="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+        <div class="controls">
+            <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
+            <button class="button" onclick="openInNewTab()">Open in New Tab</button>
+        </div>
+        <iframe src="https://slither.io" class="game-frame" allowfullscreen></iframe>
+    </div>
+
+    <div class="direct-link">
+        <p>Due to security restrictions, the game may not load in the iframe.</p>
+        <p>Click below to play:</p>
+        <a href="https://slither.io" target="_blank">Play Slither.io</a>
     </div>
 
     <script>
@@ -71,6 +112,24 @@
                 }
             }
         }
+
+        function openInNewTab() {
+            window.open('https://slither.io', '_blank');
+        }
+
+        // Check if iframe loaded successfully
+        const iframe = document.querySelector('.game-frame');
+        iframe.onload = function() {
+            try {
+                // Try to access iframe content
+                const iframeContent = iframe.contentWindow.document;
+                // If we can access it, hide the direct link message
+                document.querySelector('.direct-link').classList.remove('show');
+            } catch (e) {
+                // If we can't access iframe content, show the direct link message
+                document.querySelector('.direct-link').classList.add('show');
+            }
+        };
     </script>
 </body>
 </html> 
