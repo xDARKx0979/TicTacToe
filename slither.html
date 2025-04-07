@@ -95,7 +95,7 @@
             <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
         </div>
         <iframe 
-            src="https://slither.io" 
+            src="http://slither.com/io" 
             class="game-frame" 
             id="game-frame"
             allowfullscreen="true"
@@ -136,11 +136,12 @@
         }
         
         function openInNewTab() {
-            window.open('https://slither.io', '_blank');
+            window.open('http://slither.com/io', '_blank');
         }
         
-        // Try to focus the iframe to allow keyboard controls
+        // Show fallback on load since the site doesn't exist
         window.onload = function() {
+            // First try to load the iframe
             const iframe = document.querySelector('.game-frame');
             iframe.focus();
             
@@ -149,7 +150,13 @@
                 try {
                     // Try to access iframe content
                     const frameContent = iframe.contentWindow.document;
-                    // If we get here, iframe loaded properly
+                    // If we can access the content, check if it's an error page
+                    if (frameContent.body.innerText.includes('not found') || 
+                        frameContent.body.innerText.includes('refused') ||
+                        frameContent.body.innerText.includes('blocked') ||
+                        frameContent.body.innerText.includes('error')) {
+                        document.getElementById('fallback').style.display = 'block';
+                    }
                 } catch (e) {
                     // If we can't access the iframe content, show fallback
                     document.getElementById('fallback').style.display = 'block';
@@ -160,16 +167,10 @@
             setTimeout(function() {
                 try {
                     const frameContent = iframe.contentWindow.document;
-                    // Check if we got an error page
-                    if (frameContent.title.includes('Error') || 
-                        frameContent.body.innerText.includes('refused') ||
-                        frameContent.body.innerText.includes('blocked')) {
-                        document.getElementById('fallback').style.display = 'block';
-                    }
                 } catch (e) {
                     document.getElementById('fallback').style.display = 'block';
                 }
-            }, 5000);
+            }, 3000);
         };
     </script>
 </body>
