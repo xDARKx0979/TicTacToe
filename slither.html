@@ -3,146 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Slither.io</title>
     <style>
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        .game-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1a1a1a;
-        }
-        .game-frame {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
             display: flex;
-            gap: 10px;
-            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            font-family: Arial, sans-serif;
+            color: white;
         }
-        .button {
-            padding: 10px 20px;
+        .launch-container {
+            text-align: center;
+            padding: 2rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .play-button {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.5rem;
             background-color: #4CAF50;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .direct-link {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            display: none;
-        }
-        .direct-link.show {
-            display: block;
-        }
-        .direct-link a {
-            color: #4CAF50;
             text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
         }
-        .direct-link a:hover {
-            text-decoration: underline;
+        .play-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+        .features {
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .features ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .features li {
+            margin: 10px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        .features li:before {
+            content: "•";
+            color: #4CAF50;
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+        }
+        .window-options {
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="controls">
-            <button class="button" onclick="toggleFullscreen()">Fullscreen</button>
+    <div class="launch-container">
+        <h1>Slither.io</h1>
+        <p>Ready to dominate the arena? Choose how you want to play:</p>
+        
+        <div class="window-options">
+            <button onclick="openGame('new')" class="play-button">Play in New Tab</button>
+            <button onclick="openGame('same')" class="play-button">Play in This Tab</button>
         </div>
-        <iframe 
-            src="https://cors-anywhere.herokuapp.com/http://slither.io"
-            class="game-frame" 
-            allowfullscreen="true"
-            webkitallowfullscreen="true" 
-            mozallowfullscreen="true"
-            oallowfullscreen="true" 
-            msallowfullscreen="true"
-            frameborder="0"
-            scrolling="no"
-            allow="autoplay; fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            importance="high"
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-        ></iframe>
-    </div>
 
-    <div class="direct-link">
-        <p>Due to security restrictions, the game may not load in the iframe.</p>
-        <p>Click below to play:</p>
-        <a href="https://slither.io" target="_blank">Play Slither.io</a>
+        <div class="features">
+            <ul>
+                <li>Grow your snake by collecting glowing orbs</li>
+                <li>Compete against players worldwide</li>
+                <li>Try to become the longest snake</li>
+                <li>Use boost to outmaneuver opponents</li>
+                <li>Simple controls, endless fun!</li>
+            </ul>
+        </div>
     </div>
 
     <script>
-        function toggleFullscreen() {
-            const container = document.querySelector('.game-container');
-            if (!document.fullscreenElement) {
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
-                }
+        function openGame(windowType) {
+            if (windowType === 'new') {
+                window.open('http://slither.io', '_blank');
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                window.location.href = 'http://slither.io';
             }
         }
-
-        // Force HTTPS
-        if (window.location.protocol === 'http:') {
-            window.location.href = window.location.href.replace('http:', 'https:');
-        }
-
-        // Check if iframe loaded successfully
-        const iframe = document.querySelector('.game-frame');
-        iframe.onload = function() {
-            try {
-                // Try to access iframe content
-                const iframeContent = iframe.contentWindow.document;
-                // If we can access it, hide the direct link message
-                document.querySelector('.direct-link').classList.remove('show');
-            } catch (e) {
-                // If we can't access iframe content, show the direct link message
-                document.querySelector('.direct-link').classList.add('show');
-            }
-        };
     </script>
 </body>
 </html> 
