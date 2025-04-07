@@ -12,6 +12,9 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
         }
         .game-container {
             position: fixed;
@@ -45,6 +48,27 @@
         .hidden {
             display: none;
         }
+        .loading-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 900;
+        }
+        .direct-link {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .direct-link:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -53,14 +77,23 @@
         <button class="button" onclick="switchGameSource(0)">Server 1</button>
         <button class="button" onclick="switchGameSource(1)">Server 2</button>
         <button class="button" onclick="switchGameSource(2)">Server 3</button>
+        <button class="button" onclick="switchGameSource(3)">Server 4</button>
+    </div>
+    
+    <div class="loading-message" id="loading-message">
+        <h2>Loading Shell Shockers...</h2>
+        <p>If the game doesn't load in a few seconds, try a different server or click below:</p>
+        <a href="https://shellshock.io/" target="_blank" class="direct-link">Play Shell Shockers</a>
     </div>
     
     <!-- Multiple iframes with different sources, only one visible at a time -->
-    <iframe id="game-frame-0" src="https://shellshock.io/" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" referrerpolicy="no-referrer"></iframe>
+    <iframe id="game-frame-0" src="https://shellshock.io/" class="game-container" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
     
-    <iframe id="game-frame-1" src="https://eggwars.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" referrerpolicy="no-referrer"></iframe>
+    <iframe id="game-frame-1" src="https://eggwars.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
     
-    <iframe id="game-frame-2" src="https://egg.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" referrerpolicy="no-referrer"></iframe>
+    <iframe id="game-frame-2" src="https://play.eggcombat.com/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
+    
+    <iframe id="game-frame-3" src="https://yolk.io/" class="game-container hidden" allowfullscreen allow="autoplay; fullscreen; microphone; gamepad; accelerometer; gyroscope; camera" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>
 
     <script>
         // Current active frame
@@ -79,6 +112,14 @@
             
             // Try to focus the frame
             document.getElementById(`game-frame-${frameIndex}`).focus();
+            
+            // Show loading message
+            document.getElementById('loading-message').style.display = 'block';
+            
+            // Hide loading message after 5 seconds
+            setTimeout(function() {
+                document.getElementById('loading-message').style.display = 'none';
+            }, 5000);
         }
         
         function toggleFullscreen() {
@@ -103,36 +144,48 @@
             }
         }
         
-        // Add event listener for window message events from the iframe
-        window.addEventListener('message', function(event) {
-            // Check if the message is from one of our game frames
-            const frame = document.getElementById(`game-frame-${activeFrame}`);
-            if (event.source === frame.contentWindow) {
-                // Process messages from the game frame if needed
-                console.log('Message from game:', event.data);
+        // Try to detect if the game has loaded
+        function checkGameLoaded(frameIndex) {
+            try {
+                const frame = document.getElementById(`game-frame-${frameIndex}`);
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                
+                // If we can access the document, the game might be loaded
+                if (frameDoc && frameDoc.body) {
+                    // Check if there are elements in the body
+                    if (frameDoc.body.children.length > 0) {
+                        document.getElementById('loading-message').style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                // Cannot access iframe content, might be due to same-origin policy
+                console.log("Cannot access iframe content:", e);
             }
-        });
+        }
         
         // On page load
         window.onload = function() {
             // Initialize with the first frame
             switchGameSource(0);
             
-            // Try to prevent iframe detection methods
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.removedNodes.length > 0) {
-                        // Check if our frame was removed and add it back
-                        const currentFrame = document.getElementById(`game-frame-${activeFrame}`);
-                        if (!currentFrame) {
-                            location.reload();
-                        }
-                    }
-                });
-            });
+            // Check periodically if the game has loaded
+            setInterval(function() {
+                checkGameLoaded(activeFrame);
+            }, 1000);
             
-            // Start observing document changes
-            observer.observe(document.body, { childList: true, subtree: true });
+            // For server 1, try to bypass restrictions
+            setTimeout(function() {
+                const frame0 = document.getElementById('game-frame-0');
+                // Modify iframe attributes to help bypass restrictions
+                frame0.setAttribute('loading', 'eager');
+                frame0.setAttribute('importance', 'high');
+            }, 1000);
+            
+            // Try another approach for server 2
+            setTimeout(function() {
+                const frame1 = document.getElementById('game-frame-1');
+                frame1.setAttribute('importance', 'high');
+            }, 1000);
         };
     </script>
 </body>
