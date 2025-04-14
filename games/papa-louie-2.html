@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papa Louie 2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .game-container {
+            width: 100%;
+            height: calc(100vh - 60px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            position: relative;
+        }
+        #ruffle-player {
+            width: 800px;
+            height: 600px;
+            max-width: 95vw;
+            max-height: 71.25vw; /* Maintains 4:3 aspect ratio */
+        }
+        @media (max-height: 700px) {
+            #ruffle-player {
+                height: 85vh;
+                width: 113.33vh; /* Maintains 4:3 aspect ratio */
+                max-width: 95vw;
+            }
+        }
+        .fullscreen-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .fullscreen-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        /* Fullscreen styles */
+        .game-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        .game-container.fullscreen #ruffle-player {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+        }
+    </style>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-button">← Back to Games</a>
+        <div class="game-container" id="gameContainer">
+            <button class="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
+            <div id="ruffle-player"></div>
+        </div>
+    </div>
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        let rufflePlayer;
+
+        window.addEventListener("load", (event) => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("ruffle-player");
+            container.appendChild(player);
+            rufflePlayer = player;
+            player.load("../PapaLouie2swfURL-main/Papa Louie 2.swf");
+            
+            // Set initial size
+            player.style.width = '100%';
+            player.style.height = '100%';
+        });
+
+        function toggleFullscreen() {
+            const gameContainer = document.getElementById('gameContainer');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                gameContainer.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            }
+        }
+
+        // Handle ESC key to exit fullscreen
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        });
+
+        // Handle fullscreen change events
+        document.addEventListener('fullscreenchange', function() {
+            const gameContainer = document.getElementById('gameContainer');
+            if (document.fullscreenElement) {
+                gameContainer.classList.add('fullscreen');
+            } else {
+                gameContainer.classList.remove('fullscreen');
+            }
+        });
+    </script>
+    <script src="../theme.js"></script>
+</body>
+</html> 
