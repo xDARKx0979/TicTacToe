@@ -48,10 +48,19 @@
             z-index: 9999;
             background: var(--bg-color);
             margin: 0;
+            padding: 0;
         }
         .game-container.fullscreen #ruffle-player {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
+        .game-container.fullscreen ruffle-player {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            max-height: none !important;
         }
     </style>
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
@@ -66,17 +75,23 @@
     </div>
     <script>
         window.RufflePlayer = window.RufflePlayer || {};
+        let rufflePlayer;
+
         window.addEventListener("load", (event) => {
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
             const container = document.getElementById("ruffle-player");
             container.appendChild(player);
+            rufflePlayer = player;
             player.load("../Papas-Restuarant-Online-main/Papa's Restaurant/Papa's Bakeria/Papa's Bakeria.swf");
+            
+            // Set initial size
+            player.style.width = '100%';
+            player.style.height = '100%';
         });
 
         function toggleFullscreen() {
             const gameContainer = document.getElementById('gameContainer');
-            gameContainer.classList.toggle('fullscreen');
             
             if (document.fullscreenElement) {
                 document.exitFullscreen();
@@ -91,16 +106,24 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && document.fullscreenElement) {
                 document.exitFullscreen();
-                const gameContainer = document.getElementById('gameContainer');
-                gameContainer.classList.remove('fullscreen');
             }
         });
 
         // Handle fullscreen change events
         document.addEventListener('fullscreenchange', function() {
             const gameContainer = document.getElementById('gameContainer');
-            if (!document.fullscreenElement) {
+            if (document.fullscreenElement) {
+                gameContainer.classList.add('fullscreen');
+                if (rufflePlayer) {
+                    rufflePlayer.style.width = '100vw';
+                    rufflePlayer.style.height = '100vh';
+                }
+            } else {
                 gameContainer.classList.remove('fullscreen');
+                if (rufflePlayer) {
+                    rufflePlayer.style.width = '100%';
+                    rufflePlayer.style.height = '100%';
+                }
             }
         });
     </script>
