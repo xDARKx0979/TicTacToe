@@ -1,0 +1,133 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{
+	font-family: Verdana, Geneva, sans-serif;
+	font-size: 14px;
+	background:#FDF4D5;
+}
+#wrapper {
+	width: 960px;
+	margin: 0 auto;
+}
+#nav-bar ul {
+	list-style: none;
+	padding: 1em 0;
+	background-color: #faa01e;
+}
+#nav-bar li {
+	display: inline;
+}
+#nav-bar a {
+	padding: 1em 2em;
+	text-decoration: none;
+	color: white;
+	font-weight: normal;
+}
+a:hover, a:focus {
+	background-color: #C80000
+}
+#nav-bar img {
+	padding-right: 150px;
+}
+#header{
+	border: 1px black;
+	background: #FAA01E;
+	background-position: center top;
+}
+textarea {
+	height: 300px;
+	width: 600px;
+	font-family:Verdana, Geneva, sans-serif;
+}
+table {
+	font: large bold Verdana, Geneva, sans-serif;	
+}
+#main {
+	float: left;
+}
+#right-colom {
+	float: right;
+	padding-right: 50px;
+}
+#right-colom ul {
+	list-style: none;
+}
+#right-colom li {
+	padding-bottom: 20px;
+}
+#menu-left-center {
+	width: 600px;
+	float: left;
+}
+#menu-left {
+	float: left;
+	padding-left: 20px;
+}
+#menu-left p {
+	width: 260px;
+}
+#menu-center {
+	float: right;
+}
+#menu-center p {
+	width: 260px;
+}
+#menu-right {
+	float: right;
+	width: 313px;
+}
+#menu-right p {
+	width: 260px;
+}
+.menu-text {
+	font-family: 'Alex Brush', cursive;
+	font-size: 24px;
+	font-weight: bold;
+}
+td {
+	vertical-align: top;
+}
+#about-us-section {
+	float: left;
+}
+#about-us-aside {
+	float: right;
+	width: 280px;
+}
+footer{
+	background-color: #FAA01E;
+	height: 100px;	
+	font-family: Verdana, Geneva, sans-serif;
+	color: white;
+	margin: 0 0;
+	clear: both;
+}
+#left-footer {
+	float: left;
+	background-color: #FAA01E;
+	padding-left: 25px;
+}
+#right-footer {
+	float: right;
+	background-color: #FAA01E;
+	padding-right: 25px;
+}
+.dine-in {
+	text-align: center;
+	font-weight: bold;
+	font-size: larger;
+}
+.hours {
+	text-align: center;
+	font-size: small;
+}
+.phonenumber {
+	text-align: center;
+	font-weight: bold;
+	font-size: large;
+}
+.copyright {
+	text-align: center;
+	font-size: smaller;
+}
