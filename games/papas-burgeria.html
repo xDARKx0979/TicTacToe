@@ -13,6 +13,7 @@
             justify-content: center;
             align-items: center;
             margin-top: 10px;
+            position: relative;
         }
         #ruffle-player {
             width: 100%;
@@ -20,13 +21,46 @@
             max-width: 800px;
             max-height: 600px;
         }
+        .fullscreen-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .fullscreen-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        /* Fullscreen styles */
+        .game-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: var(--bg-color);
+            margin: 0;
+        }
+        .game-container.fullscreen #ruffle-player {
+            max-width: 100%;
+            max-height: 100%;
+        }
     </style>
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 </head>
 <body>
     <div class="container">
         <a href="../papas-restaurant.html" class="back-button">← Back to Papa's Games</a>
-        <div class="game-container">
+        <div class="game-container" id="gameContainer">
+            <button class="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
             <div id="ruffle-player"></div>
         </div>
     </div>
@@ -38,6 +72,36 @@
             const container = document.getElementById("ruffle-player");
             container.appendChild(player);
             player.load("../Papas-Restuarant-Online-main/Papa's Restaurant/Papa's Burgeria/Papa's Burgeria.swf");
+        });
+
+        function toggleFullscreen() {
+            const gameContainer = document.getElementById('gameContainer');
+            gameContainer.classList.toggle('fullscreen');
+            
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                gameContainer.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            }
+        }
+
+        // Handle ESC key to exit fullscreen
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.fullscreenElement) {
+                document.exitFullscreen();
+                const gameContainer = document.getElementById('gameContainer');
+                gameContainer.classList.remove('fullscreen');
+            }
+        });
+
+        // Handle fullscreen change events
+        document.addEventListener('fullscreenchange', function() {
+            const gameContainer = document.getElementById('gameContainer');
+            if (!document.fullscreenElement) {
+                gameContainer.classList.remove('fullscreen');
+            }
         });
     </script>
     <script src="../theme.js"></script>
