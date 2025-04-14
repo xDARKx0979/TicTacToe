@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papa's Burgeria</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .game-container {
+            width: 100%;
+            height: calc(100vh - 60px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #ruffle-player {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+        }
+    </style>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="../papas-restaurant.html" class="back-button">← Back to Papa's Games</a>
+        <div class="game-container">
+            <div id="ruffle-player"></div>
+        </div>
+    </div>
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.addEventListener("load", (event) => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("ruffle-player");
+            container.appendChild(player);
+            player.load("../Papas-Restuarant-Online-main/Papa's Restaurant/Papa's Burgeria/Papa's Burgeria.swf");
+        });
+    </script>
+    <script src="../theme.js"></script>
+</body>
+</html> 
