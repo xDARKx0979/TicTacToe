@@ -41,6 +41,7 @@
             max-width: 800px !important;
             margin: 0 auto !important;
             padding: 30px !important;
+            background-color: #faf8ef !important; /* Light mode background */
         }
         
         /* Fix score numbers */
@@ -95,10 +96,41 @@
         body.dark-mode #container.container {
             background: #1e1e1e !important;
         }
+        
+        /* Keep numbered tile colors consistent in both modes */
+        .dark-mode .tile .tile-inner {
+            /* Use original colors for all tiles */
+            background-color: inherit !important;
+            color: inherit !important;
+            box-shadow: inherit !important;
+        }
+        
+        /* Reset any tile-specific overrides in dark mode */
+        .dark-mode .tile.tile-2 .tile-inner,
+        .dark-mode .tile.tile-4 .tile-inner,
+        .dark-mode .tile.tile-8 .tile-inner,
+        .dark-mode .tile.tile-16 .tile-inner,
+        .dark-mode .tile.tile-32 .tile-inner,
+        .dark-mode .tile.tile-64 .tile-inner,
+        .dark-mode .tile.tile-128 .tile-inner,
+        .dark-mode .tile.tile-256 .tile-inner,
+        .dark-mode .tile.tile-512 .tile-inner,
+        .dark-mode .tile.tile-1024 .tile-inner,
+        .dark-mode .tile.tile-2048 .tile-inner {
+            /* Inherit original colors from the light theme */
+            background-color: inherit !important;
+            color: inherit !important;
+        }
     </style>
     <script>
         // Check theme on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Set container ID for easier targeting
+            const container = document.querySelector('.container');
+            if (container) {
+                container.id = 'container';
+            }
+            
             // Check for saved theme preference
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
@@ -106,10 +138,17 @@
                 document.body.classList.add('dark-mode');
                 
                 // Apply dark mode to the container
-                const container = document.querySelector('.container');
                 if (container) {
-                    container.id = 'container'; // Add ID for easier targeting
                     container.style.backgroundColor = '#1e1e1e';
+                }
+            } else {
+                // Ensure light mode is applied
+                document.documentElement.classList.remove('dark-mode');
+                document.body.classList.remove('dark-mode');
+                
+                // Apply light mode to the container
+                if (container) {
+                    container.style.backgroundColor = '#faf8ef';
                 }
             }
         });
