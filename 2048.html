@@ -99,27 +99,69 @@
         
         /* Keep numbered tile colors consistent in both modes */
         .dark-mode .tile .tile-inner {
-            /* Use original colors for all tiles */
-            background-color: inherit !important;
-            color: inherit !important;
-            box-shadow: inherit !important;
+            /* Remove inherit */
+            box-shadow: none !important;
         }
         
-        /* Reset any tile-specific overrides in dark mode */
-        .dark-mode .tile.tile-2 .tile-inner,
-        .dark-mode .tile.tile-4 .tile-inner,
-        .dark-mode .tile.tile-8 .tile-inner,
-        .dark-mode .tile.tile-16 .tile-inner,
-        .dark-mode .tile.tile-32 .tile-inner,
-        .dark-mode .tile.tile-64 .tile-inner,
-        .dark-mode .tile.tile-128 .tile-inner,
-        .dark-mode .tile.tile-256 .tile-inner,
-        .dark-mode .tile.tile-512 .tile-inner,
-        .dark-mode .tile.tile-1024 .tile-inner,
+        /* Define exact colors for each tile type in dark mode */
+        .dark-mode .tile.tile-2 .tile-inner {
+            background: #eee4da !important;
+            color: #776e65 !important;
+        }
+        
+        .dark-mode .tile.tile-4 .tile-inner {
+            background: #ede0c8 !important;
+            color: #776e65 !important;
+        }
+        
+        .dark-mode .tile.tile-8 .tile-inner {
+            background: #f2b179 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        .dark-mode .tile.tile-16 .tile-inner {
+            background: #f59563 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        .dark-mode .tile.tile-32 .tile-inner {
+            background: #f67c5f !important;
+            color: #f9f6f2 !important;
+        }
+        
+        .dark-mode .tile.tile-64 .tile-inner {
+            background: #f65e3b !important;
+            color: #f9f6f2 !important;
+        }
+        
+        .dark-mode .tile.tile-128 .tile-inner {
+            background: #edcf72 !important;
+            color: #f9f6f2 !important;
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.2381), inset 0 0 0 1px rgba(255, 255, 255, 0.14286) !important;
+        }
+        
+        .dark-mode .tile.tile-256 .tile-inner {
+            background: #edcc61 !important;
+            color: #f9f6f2 !important;
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.31746), inset 0 0 0 1px rgba(255, 255, 255, 0.19048) !important;
+        }
+        
+        .dark-mode .tile.tile-512 .tile-inner {
+            background: #edc850 !important;
+            color: #f9f6f2 !important;
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.39683), inset 0 0 0 1px rgba(255, 255, 255, 0.2381) !important;
+        }
+        
+        .dark-mode .tile.tile-1024 .tile-inner {
+            background: #edc53f !important;
+            color: #f9f6f2 !important;
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.47619), inset 0 0 0 1px rgba(255, 255, 255, 0.28571) !important;
+        }
+        
         .dark-mode .tile.tile-2048 .tile-inner {
-            /* Inherit original colors from the light theme */
-            background-color: inherit !important;
-            color: inherit !important;
+            background: #edc22e !important;
+            color: #f9f6f2 !important;
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.55556), inset 0 0 0 1px rgba(255, 255, 255, 0.33333) !important;
         }
     </style>
     <script>
