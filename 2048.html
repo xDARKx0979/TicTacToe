@@ -8,8 +8,10 @@
     <link rel="stylesheet" href="2048-master/style/main.css">
     <style>
         .game-container {
-            max-width: 600px;
+            width: 500px;
+            height: 500px;
             margin: 0 auto;
+            position: relative;
             background: transparent !important;
         }
         
@@ -19,58 +21,87 @@
         }
         
         .container {
+            width: 500px;
             padding: 0;
-            max-width: 600px;
             margin: 0 auto;
         }
         
         .grid-container {
             width: 500px;
             height: 500px;
-            margin: 0 auto;
+            padding: 0;
+            position: absolute;
+            z-index: 1;
+        }
+        
+        .grid-row {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .grid-row:last-child {
+            margin-bottom: 0;
         }
         
         .grid-cell {
             width: 106.25px;
             height: 106.25px;
-            margin: 15px;
+            margin-right: 15px;
+            float: left;
+            border-radius: 3px;
+        }
+        
+        .grid-cell:last-child {
+            margin-right: 0;
+        }
+        
+        .tile-container {
+            position: absolute;
+            z-index: 2;
         }
         
         .tile {
             width: 106.25px;
             height: 106.25px;
+            position: absolute;
+            transition: 100ms ease-in-out;
+            transition-property: transform;
+        }
+        
+        .tile .tile-inner {
+            width: 106.25px;
+            height: 106.25px;
             line-height: 106.25px;
+            border-radius: 3px;
         }
         
         /* Dark mode overrides */
+        body.dark-mode {
+            background-color: var(--bg-color);
+        }
+        
         body.dark-mode .container {
             background: var(--bg-color);
             color: var(--text-color);
         }
         
-        body.dark-mode {
-            background-color: var(--bg-color);
-        }
-        
         body.dark-mode .grid-container {
-            background: #333;
+            background: #1e1e1e;
+            border-radius: 6px;
         }
         
         body.dark-mode .grid-cell {
-            background: rgba(50, 50, 50, 0.35);
+            background: rgba(70, 70, 70, 0.35);
         }
         
-        body.dark-mode .tile-container .tile {
-            background: #444;
+        body.dark-mode .tile .tile-inner {
+            box-shadow: none;
         }
         
         body.dark-mode .game-message {
             background: rgba(20, 20, 20, 0.9);
             color: white;
-        }
-        
-        body.dark-mode .tile-new {
-            background: #444;
         }
         
         body.dark-mode .score-container, 
@@ -110,10 +141,6 @@
         }
         
         /* Tile colors in dark mode */
-        body.dark-mode .tile .tile-inner {
-            box-shadow: none;
-        }
-        
         body.dark-mode .tile.tile-2 .tile-inner {
             background: #554f47;
             color: #f9f6f2;
@@ -160,36 +187,36 @@
             background: #3a281c;
         }
         
-        @media (max-width: 650px) {
+        @media (max-width: 520px) {
             .container, .game-container {
-                width: 100%;
-                max-width: 500px;
+                width: 280px;
+                height: 280px;
                 margin: 0 auto;
             }
             
             .grid-container {
                 width: 280px;
                 height: 280px;
+                padding: 0;
             }
             
             .grid-cell {
-                width: 56.25px;
-                height: 56.25px;
-                margin: 8px;
+                width: 57.5px;
+                height: 57.5px;
+                margin-right: 10px;
+                border-radius: 3px;
             }
             
             .tile {
-                width: 56.25px;
-                height: 56.25px;
-                line-height: 56.25px;
+                width: 57.5px;
+                height: 57.5px;
             }
             
-            .tile.tile-2 .tile-inner {
-                font-size: 35px;
-            }
-            
-            .tile.tile-4 .tile-inner {
-                font-size: 35px;
+            .tile .tile-inner {
+                width: 57.5px;
+                height: 57.5px;
+                line-height: 57.5px;
+                font-size: 25px;
             }
         }
     </style>
