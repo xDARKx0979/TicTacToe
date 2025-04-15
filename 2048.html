@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="2048-master/style/main.css">
+    <style>
+        .game-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            padding: 0;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 520px) {
+            .game-container {
+                width: 280px;
+                margin: 0 auto;
+            }
+            
+            .grid-cell {
+                width: 65px;
+                height: 65px;
+            }
+            
+            .grid-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .tile {
+                width: 65px;
+                height: 65px;
+                line-height: 65px;
+            }
+            
+            .tile.tile-2 .tile-inner {
+                font-size: 35px;
+            }
+            
+            .tile.tile-4 .tile-inner {
+                font-size: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Games</a>
+        
+        <div class="heading">
+            <h1 class="title">2048</h1>
+            <div class="scores-container">
+                <div class="score-container">0</div>
+                <div class="best-container">0</div>
+            </div>
+        </div>
+
+        <div class="above-game">
+            <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
+            <a class="restart-button">New Game</a>
+        </div>
+
+        <div class="game-container">
+            <div class="game-message">
+                <p></p>
+                <div class="lower">
+                    <a class="keep-playing-button">Keep going</a>
+                    <a class="retry-button">Try again</a>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="grid-row">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+            </div>
+
+            <div class="tile-container"></div>
+        </div>
+
+        <p class="game-explanation">
+            <strong class="important">How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong>
+        </p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="2048-master/js/bind_polyfill.js"></script>
+    <script src="2048-master/js/classlist_polyfill.js"></script>
+    <script src="2048-master/js/animframe_polyfill.js"></script>
+    <script src="2048-master/js/keyboard_input_manager.js"></script>
+    <script src="2048-master/js/html_actuator.js"></script>
+    <script src="2048-master/js/grid.js"></script>
+    <script src="2048-master/js/tile.js"></script>
+    <script src="2048-master/js/local_storage_manager.js"></script>
+    <script src="2048-master/js/game_manager.js"></script>
+    <script src="2048-master/js/application.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html> 
