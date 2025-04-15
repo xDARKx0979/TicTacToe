@@ -6,6 +6,44 @@
     <title>2048</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="2048-master/style/main.css">
+    <style id="theme-override"></style>
+    <script>
+        // Immediately check if dark mode is active and apply overrides
+        document.addEventListener('DOMContentLoaded', function() {
+            updateThemeOverrides();
+        });
+        
+        // Function to update theme overrides
+        function updateThemeOverrides() {
+            const isDarkMode = document.documentElement.classList.contains('dark-mode') || 
+                              document.body.classList.contains('dark-mode') ||
+                              document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            const themeOverride = document.getElementById('theme-override');
+            if (isDarkMode) {
+                themeOverride.textContent = `
+                    html, body, .container, .heading, .above-game, .game-container, .game-explanation {
+                        background-color: var(--bg-color) !important;
+                        color: var(--text-color) !important;
+                    }
+                    .container {
+                        box-shadow: none !important;
+                    }
+                `;
+            } else {
+                themeOverride.textContent = '';
+            }
+        }
+        
+        // Override the theme toggle function to update overrides
+        const originalToggleTheme = window.toggleTheme;
+        window.toggleTheme = function() {
+            if (originalToggleTheme) {
+                originalToggleTheme.apply(this, arguments);
+            }
+            updateThemeOverrides();
+        };
+    </script>
     <style>
         body {
             background-color: #faf8ef;
@@ -309,6 +347,36 @@
         body.dark-mode .above-game, body.dark-mode .game-explanation {
             background-color: var(--bg-color) !important;
             color: var(--text-color) !important;
+        }
+        
+        /* Additional overrides to fix dark mode */
+        .dark-mode .container {
+            background-color: var(--bg-color) !important;
+            box-shadow: none !important;
+        }
+        
+        .dark-mode .heading {
+            background-color: var(--bg-color) !important;
+        }
+        
+        .dark-mode .game-container {
+            background-color: var(--bg-color) !important;
+        }
+        
+        .dark-mode .title {
+            color: var(--text-color) !important;
+        }
+        
+        .dark-mode .game-intro {
+            color: var(--text-color) !important;
+        }
+        
+        /* Override the original 2048 main.css styles */
+        @media (prefers-color-scheme: dark) {
+            .dark-mode.container {
+                background: var(--bg-color) !important;
+                color: var(--text-color) !important;
+            }
         }
     </style>
 </head>
