@@ -48,10 +48,26 @@
             color: #776e65 !important;
         }
         
-        /* Dark mode minimal overrides */
+        /* Comprehensive dark mode overrides */
+        html.dark-mode, 
+        body.dark-mode {
+            background-color: #121212 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        /* Override the body color directly for dark mode */
+        body {
+            background-color: #121212 !important;
+        }
+        
         .dark-mode .container {
-            background: var(--bg-color) !important;
+            background: #1e1e1e !important;
             color: var(--text-color) !important;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark-mode .heading {
+            background: #1e1e1e !important;
         }
         
         .dark-mode .title, 
@@ -61,7 +77,7 @@
         }
         
         .dark-mode .grid-container {
-            background: #1e1e1e !important;
+            background: #333 !important;
         }
         
         .dark-mode .grid-cell {
@@ -74,7 +90,26 @@
             color: #f9f6f2 !important;
             background: #444 !important;
         }
+        
+        /* Force override to bypass the original CSS */
+        #container.container {
+            background: #1e1e1e !important;
+        }
     </style>
+    <script>
+        // Force dark mode on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+            
+            // Apply dark mode to the container
+            const container = document.querySelector('.container');
+            if (container) {
+                container.id = 'container'; // Add ID for easier targeting
+                container.style.backgroundColor = '#1e1e1e';
+            }
+        });
+    </script>
 </head>
 <body>
     <a href="https://patreon.com/Dark0979?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink" target="_blank" class="support-button">
