@@ -52,6 +52,29 @@
             cursor: pointer;
             border-radius: 3px;
         }
+
+        .music-control {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background-color 0.3s;
+            z-index: 100;
+        }
+
+        .music-control:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
     </style>
 </head>
 <body>
@@ -91,6 +114,9 @@
                 <input type="text" id="code-input" maxlength="4" placeholder="Code">
                 <button id="code-submit">OK</button>
             </div>
+
+            <!-- Music control button -->
+            <button class="music-control" id="music-toggle">🔊</button>
             
             <!-- Floating score display -->
             <div class="floating-score">
@@ -116,5 +142,38 @@
         </div>
     </div>
     <script src="tetris.js"></script>
+    <script>
+        // Background music control
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create audio element
+            const bgMusic = new Audio('tetris.mp3');
+            bgMusic.loop = true;
+            bgMusic.volume = 0.5;
+            
+            // Music toggle functionality
+            const musicToggle = document.getElementById('music-toggle');
+            let isMuted = false;
+            
+            // Auto-play music when user interacts with the page
+            document.getElementById('start').addEventListener('click', function() {
+                if (!isMuted) {
+                    bgMusic.play().catch(e => console.log("Auto-play prevented by browser: " + e));
+                }
+            });
+            
+            // Toggle mute/unmute
+            musicToggle.addEventListener('click', function() {
+                if (isMuted) {
+                    bgMusic.play();
+                    musicToggle.textContent = '🔊';
+                    isMuted = false;
+                } else {
+                    bgMusic.pause();
+                    musicToggle.textContent = '🔇';
+                    isMuted = true;
+                }
+            });
+        });
+    </script>
 </body>
 </html> 
