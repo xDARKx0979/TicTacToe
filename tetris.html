@@ -154,7 +154,20 @@
             const musicToggle = document.getElementById('music-toggle');
             let isMuted = false;
             
-            // Auto-play music when user interacts with the page
+            // Try to play music immediately
+            bgMusic.play().catch(e => {
+                console.log("Auto-play prevented initially: " + e);
+                // Most browsers require user interaction, so we'll set up multiple triggers
+            });
+            
+            // Try to play music on any user interaction with the page
+            document.body.addEventListener('click', function() {
+                if (!isMuted && bgMusic.paused) {
+                    bgMusic.play().catch(e => console.log("Auto-play prevented: " + e));
+                }
+            }, { once: true });
+            
+            // Auto-play music when user starts the game
             document.getElementById('start').addEventListener('click', function() {
                 if (!isMuted) {
                     bgMusic.play().catch(e => console.log("Auto-play prevented by browser: " + e));
