@@ -35,6 +35,19 @@
             height: 20px;
         }
         
+        /* Make the frame bigger for desktop */
+        .container {
+            width: 800px !important;
+            max-width: 800px !important;
+            margin: 0 auto !important;
+            padding: 30px !important;
+        }
+        
+        /* Fix score numbers */
+        .score-container, .best-container {
+            color: #776e65 !important;
+        }
+        
         /* Dark mode minimal overrides */
         .dark-mode .container {
             background: var(--bg-color) !important;
@@ -53,6 +66,13 @@
         
         .dark-mode .grid-cell {
             background: rgba(70, 70, 70, 0.35) !important;
+        }
+        
+        /* Fix score numbers in dark mode */
+        .dark-mode .score-container, 
+        .dark-mode .best-container {
+            color: #f9f6f2 !important;
+            background: #444 !important;
         }
     </style>
 </head>
