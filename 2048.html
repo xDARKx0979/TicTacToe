@@ -859,23 +859,46 @@
                         
                         if (availableCells.length) {
                             // First, check if we're in danger of losing
-                            const inDanger = this.checkIfGameCouldEnd();
-                            
-                            if (inDanger) {
-                                // Choose a smart position for the tile
-                                const bestTilePosition = this.findBestTilePosition();
-                                // Always use a 2 (easier)
-                                const tile = new Tile(bestTilePosition, 2);
-                                this.grid.insertTile(tile);
-                            } else {
-                                // Not in danger, use the original method
-                                originalAddRandomTile.call(this);
+                            // Only do expensive calculations if few cells remain
+                            if (availableCells.length <= 3) {
+                                const inDanger = this.checkIfGameCouldEnd();
+                                
+                                if (inDanger) {
+                                    // Choose a smart position for the tile
+                                    const bestTilePosition = this.findBestTilePosition(availableCells);
+                                    // Always use a 2 (easier)
+                                    const tile = new Tile(bestTilePosition, 2);
+                                    this.grid.insertTile(tile);
+                                    return; // Exit early
+                                }
                             }
+                            
+                            // Not in danger or lots of cells, use the original method
+                            originalAddRandomTile.call(this);
                         }
                     } else {
                         // Bot not active, use original method
                         originalAddRandomTile.call(this);
                     }
+                };
+                
+                // Performance cache for calculated results
+                instance.calculationCache = {
+                    lastGridState: null,
+                    cachedResults: {}
+                };
+                
+                // Helper to get a grid hash for caching
+                instance.getGridHash = function(grid) {
+                    let hash = "";
+                    for (let x = 0; x < grid.size; x++) {
+                        for (let y = 0; y < grid.size; y++) {
+                            const cell = grid.cells[x][y];
+                            hash += cell ? cell.value : "0";
+                            hash += ",";
+                        }
+                    }
+                    return hash;
                 };
                 
                 // HELPER METHODS - These don't override any existing functionality
@@ -888,49 +911,108 @@
                     // If more than 3 empty cells, we're probably safe
                     if (emptyCells.length > 3) return false;
                     
-                    // Try placing a 4 (worst case) in each empty cell and see if any move is possible
-                    for (const cell of emptyCells) {
-                        // Create a temporary grid to test
-                        const gridCopy = this.grid.clone();
+                    // Get grid hash for cache lookup
+                    const gridHash = this.getGridHash(this.grid);
+                    
+                    // Check if we've calculated this before
+                    if (this.calculationCache.cachedResults[gridHash]) {
+                        return this.calculationCache.cachedResults[gridHash].inDanger;
+                    }
+                    
+                    // Start with optimistic assumption 
+                    let inDanger = false;
+                    
+                    // Optimization: First check with a simplified approach
+                    // If there's at least one move that would still be possible, we're not in danger
+                    let anyMovePossible = false;
+                    
+                    // Try each direction without placing a new tile
+                    for (let direction = 0; direction < 4; direction++) {
+                        // Create a test grid copy
+                        const testGrid = this.grid.clone();
                         
-                        // Insert a 4 at this position
-                        const testTile = new Tile(cell, 4);
-                        gridCopy.insertTile(testTile);
+                        // Test move
+                        const moved = this.testMove(testGrid, direction);
                         
-                        // Use the original game's move availability check
-                        if (!this.isMovesAvailable(gridCopy)) {
-                            // This cell would cause a game over! We're in danger
-                            return true;
+                        if (moved) {
+                            anyMovePossible = true;
+                            break;
                         }
                     }
                     
-                    // All cells were safe
-                    return false;
-                };
-                
-                // Use a custom function instead of overriding original game methods
-                instance.isMovesAvailable = function(grid) {
-                    return grid.cellsAvailable() || this.isTileMatchesAvailable(grid);
-                };
-                
-                // Custom helper that doesn't override original methods
-                instance.isTileMatchesAvailable = function(grid) {
-                    const size = grid.size;
+                    // If no moves are possible right now, we're in danger
+                    if (!anyMovePossible) {
+                        inDanger = true;
+                    } else {
+                        // More detailed check only if necessary and we have few empty cells
+                        if (emptyCells.length < 3) {
+                            // Try placing a 4 (worst case) in each empty cell and see if any move is possible
+                            // Optimization: Only check up to 3 random cells to save performance
+                            const cellsToCheck = emptyCells.length <= 2 ? emptyCells : 
+                                                [emptyCells[0], emptyCells[1]];
+                            
+                            for (const cell of cellsToCheck) {
+                                // Create a temporary grid to test
+                                const gridCopy = this.grid.clone();
+                                
+                                // Insert a 4 at this position (worst case)
+                                const testTile = new Tile(cell, 4);
+                                gridCopy.insertTile(testTile);
+                                
+                                // Quick check for any possible moves
+                                let movePossible = false;
+                                for (let direction = 0; direction < 4; direction++) {
+                                    if (this.testMove(gridCopy, direction)) {
+                                        movePossible = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (!movePossible) {
+                                    // This cell could cause a game over
+                                    inDanger = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     
-                    for (let x = 0; x < size; x++) {
-                        for (let y = 0; y < size; y++) {
-                            const tile = grid.cellContent({x: x, y: y});
+                    // Cache the result
+                    this.calculationCache.cachedResults[gridHash] = { inDanger };
+                    
+                    // Clear cache if it grows too large (keep only recent 20 entries)
+                    const cacheKeys = Object.keys(this.calculationCache.cachedResults);
+                    if (cacheKeys.length > 20) {
+                        delete this.calculationCache.cachedResults[cacheKeys[0]];
+                    }
+                    
+                    return inDanger;
+                };
+                
+                // Quick test if a move is possible without full simulation
+                instance.testMove = function(grid, direction) {
+                    // Get vector for the direction
+                    const vector = this.getVectorForDirection(direction);
+                    
+                    // Check if any tile can move or merge in this direction
+                    for (let x = 0; x < grid.size; x++) {
+                        for (let y = 0; y < grid.size; y++) {
+                            const tile = grid.cells[x][y];
                             
                             if (tile) {
-                                // Check all adjacent cells
-                                for (let direction = 0; direction < 4; direction++) {
-                                    const vector = this.getVectorForDirection(direction);
-                                    const cell = { x: x + vector.x, y: y + vector.y };
+                                // Check if we can move this tile in the given direction
+                                const targetX = x + vector.x;
+                                const targetY = y + vector.y;
+                                
+                                // Is the target position within bounds?
+                                if (targetX >= 0 && targetX < grid.size && 
+                                    targetY >= 0 && targetY < grid.size) {
                                     
-                                    const other = grid.cellContent(cell);
+                                    const target = grid.cells[targetX][targetY];
                                     
-                                    if (other && other.value === tile.value) {
-                                        return true; // These tiles can be merged
+                                    // Can move to empty space or can merge with same value
+                                    if (!target || (target && target.value === tile.value)) {
+                                        return true;
                                     }
                                 }
                             }
@@ -940,7 +1022,22 @@
                     return false;
                 };
                 
-                // Helper function that doesn't override original methods
+                // Use a custom function instead of overriding original game methods
+                instance.isMovesAvailable = function(grid) {
+                    // Fast path - if there are empty cells, moves are available
+                    if (grid.cellsAvailable()) return true;
+                    
+                    // Check for possible merges using a simplified approach
+                    for (let direction = 0; direction < 4; direction++) {
+                        if (this.testMove(grid, direction)) {
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                };
+                
+                // Helper function for getting direction vectors
                 instance.getVectorForDirection = function(direction) {
                     // Vectors representing tile movement
                     return {
@@ -952,17 +1049,23 @@
                 };
                 
                 // Find best position for new tile to prevent game over
-                instance.findBestTilePosition = function() {
-                    const emptyCells = this.grid.availableCells();
-                    
+                instance.findBestTilePosition = function(availableCells) {
                     // If no empty cells, just return the first one (shouldn't happen)
-                    if (emptyCells.length === 0) return emptyCells[0];
+                    if (!availableCells || availableCells.length === 0) {
+                        return this.grid.availableCells()[0];
+                    }
                     
-                    let bestCell = emptyCells[0];
+                    // Optimization: If many cells available, pick one randomly to save computation
+                    if (availableCells.length > 3) {
+                        const randomIndex = Math.floor(Math.random() * availableCells.length);
+                        return availableCells[randomIndex];
+                    }
+                    
+                    let bestCell = availableCells[0];
                     let bestScore = -Infinity;
                     
                     // Try each empty cell
-                    for (const cell of emptyCells) {
+                    for (const cell of availableCells) {
                         // Create a temporary grid
                         const gridCopy = this.grid.clone();
                         
@@ -973,8 +1076,16 @@
                         // Calculate score for this position
                         let score = 0;
                         
-                        // Check if moves would still be available (most important)
-                        if (this.isMovesAvailable(gridCopy)) {
+                        // Check if any move would still be available (most important)
+                        let movesAvailable = false;
+                        for (let direction = 0; direction < 4; direction++) {
+                            if (this.testMove(gridCopy, direction)) {
+                                movesAvailable = true;
+                                break;
+                            }
+                        }
+                        
+                        if (movesAvailable) {
                             score += 1000; // Big bonus for not ending the game
                             
                             // Add additional score for positions that are good
