@@ -878,6 +878,8 @@
                     }
                 };
                 
+                // HELPER METHODS - These don't override any existing functionality
+                
                 // Add method to check if game could end next move
                 instance.checkIfGameCouldEnd = function() {
                     // Get all empty cells
@@ -895,8 +897,8 @@
                         const testTile = new Tile(cell, 4);
                         gridCopy.insertTile(testTile);
                         
-                        // Check if any moves would be possible
-                        if (!this.movesAvailable(gridCopy)) {
+                        // Use the original game's move availability check
+                        if (!this.isMovesAvailable(gridCopy)) {
                             // This cell would cause a game over! We're in danger
                             return true;
                         }
@@ -906,13 +908,13 @@
                     return false;
                 };
                 
-                // Check if any moves are available on a given grid
-                instance.movesAvailable = function(grid) {
-                    return grid.cellsAvailable() || this.tileMatchesAvailable(grid);
+                // Use a custom function instead of overriding original game methods
+                instance.isMovesAvailable = function(grid) {
+                    return grid.cellsAvailable() || this.isTileMatchesAvailable(grid);
                 };
                 
-                // Check if tiles can be merged
-                instance.tileMatchesAvailable = function(grid) {
+                // Custom helper that doesn't override original methods
+                instance.isTileMatchesAvailable = function(grid) {
                     const size = grid.size;
                     
                     for (let x = 0; x < size; x++) {
@@ -922,7 +924,7 @@
                             if (tile) {
                                 // Check all adjacent cells
                                 for (let direction = 0; direction < 4; direction++) {
-                                    const vector = this.getVector(direction);
+                                    const vector = this.getVectorForDirection(direction);
                                     const cell = { x: x + vector.x, y: y + vector.y };
                                     
                                     const other = grid.cellContent(cell);
@@ -938,8 +940,8 @@
                     return false;
                 };
                 
-                // Get vector for a direction
-                instance.getVector = function(direction) {
+                // Helper function that doesn't override original methods
+                instance.getVectorForDirection = function(direction) {
                     // Vectors representing tile movement
                     return {
                         0: { x: 0,  y: -1 }, // Up
@@ -972,7 +974,7 @@
                         let score = 0;
                         
                         // Check if moves would still be available (most important)
-                        if (this.movesAvailable(gridCopy)) {
+                        if (this.isMovesAvailable(gridCopy)) {
                             score += 1000; // Big bonus for not ending the game
                             
                             // Add additional score for positions that are good
