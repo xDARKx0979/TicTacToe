@@ -35,6 +35,54 @@
             height: 20px;
         }
         
+        /* Bot button styles */
+        .bot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #8f7a66;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .bot-button:hover {
+            background: #9f8b77;
+            transform: translateY(-2px);
+        }
+        
+        .dark-mode .bot-button {
+            background: #635B52;
+        }
+        
+        .dark-mode .bot-button:hover {
+            background: #736C63;
+        }
+        
+        .recommendation {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background: rgba(143, 122, 102, 0.85);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            z-index: 1000;
+            max-width: 200px;
+            display: none;
+        }
+        
+        .dark-mode .recommendation {
+            background: rgba(99, 91, 82, 0.85);
+        }
+        
         /* Make the frame bigger for desktop */
         .container {
             width: 800px !important;
@@ -193,6 +241,258 @@
                     container.style.backgroundColor = '#faf8ef';
                 }
             }
+            
+            // Add bot button functionality
+            let botActive = false;
+            const botButton = document.createElement('button');
+            botButton.className = 'bot-button';
+            botButton.textContent = 'Assistant';
+            document.body.appendChild(botButton);
+            
+            // Create recommendation display
+            const recommendation = document.createElement('div');
+            recommendation.className = 'recommendation';
+            document.body.appendChild(recommendation);
+            
+            botButton.addEventListener('click', function() {
+                if (!botActive) {
+                    const code = prompt('Enter 4-digit code:');
+                    if (code === '7362') {
+                        botActive = true;
+                        botButton.textContent = 'Assistant (Active)';
+                        botButton.style.background = '#2ecc71';
+                        
+                        // Start providing recommendations
+                        showRecommendation();
+                        
+                        // Setup observer to update recommendation when game state changes
+                        setupGameObserver();
+                        
+                        alert('Move assistant activated!');
+                    } else if (code !== null) {
+                        alert('Incorrect code');
+                    }
+                } else {
+                    botActive = false;
+                    botButton.textContent = 'Assistant';
+                    botButton.style.background = '';
+                    recommendation.style.display = 'none';
+                }
+            });
+            
+            function showRecommendation() {
+                if (!botActive) return;
+                
+                try {
+                    // Get the game manager instance - this needs to be fixed
+                    const gameManager = window.gameManager;
+                    if (!gameManager) {
+                        console.error('Could not access game manager');
+                        return;
+                    }
+                    
+                    const grid = gameManager.grid;
+                    const bestMove = calculateBestMove(grid);
+                    
+                    // Display recommendation
+                    recommendation.style.display = 'block';
+                    recommendation.textContent = 'Recommended move: ' + bestMove;
+                } catch (e) {
+                    console.error('Error calculating recommendation', e);
+                    recommendation.textContent = 'Error calculating move';
+                }
+            }
+            
+            function setupGameObserver() {
+                // Set up a MutationObserver to detect game state changes
+                const observer = new MutationObserver(function(mutations) {
+                    showRecommendation();
+                });
+                
+                // Observe the tile container for changes
+                const tileContainer = document.querySelector('.tile-container');
+                if (tileContainer) {
+                    observer.observe(tileContainer, { childList: true, subtree: true });
+                }
+            }
+            
+            function calculateBestMove(grid) {
+                // Get current game state from the global game manager
+                const gameManagerInstance = window.gameManager;
+                if (!gameManagerInstance) return "Unknown";
+                
+                // Get the current grid state
+                const cells = gameManagerInstance.grid.cells;
+                
+                // Simple heuristic for now: evaluate each move and pick the best one
+                const moves = ['up', 'right', 'down', 'left'];
+                let bestScore = -1;
+                let bestMove = '';
+                
+                for (const move of moves) {
+                    // Clone the current grid
+                    const gridClone = cloneGrid(cells);
+                    
+                    // Simulate the move
+                    const moveScore = evaluateMove(gridClone, move);
+                    
+                    if (moveScore > bestScore) {
+                        bestScore = moveScore;
+                        bestMove = move;
+                    }
+                }
+                
+                // Map direction to arrow
+                const moveMap = {
+                    'up': '↑ Up',
+                    'right': '→ Right',
+                    'down': '↓ Down',
+                    'left': '← Left'
+                };
+                
+                return moveMap[bestMove] || 'Unknown';
+            }
+            
+            function cloneGrid(cells) {
+                const clone = [];
+                for (let x = 0; x < 4; x++) {
+                    clone[x] = [];
+                    for (let y = 0; y < 4; y++) {
+                        clone[x][y] = cells[x][y] ? { value: cells[x][y].value } : null;
+                    }
+                }
+                return clone;
+            }
+            
+            function evaluateMove(grid, direction) {
+                // This is a simplified evaluation function
+                // A more advanced bot would use lookahead and better heuristics
+                let score = 0;
+                
+                // Weight factors (these can be tuned)
+                const EMPTY_WEIGHT = 2.7;    // More empty cells is good
+                const MONOTONICITY_WEIGHT = 1.0;  // Tiles should be in order
+                const SMOOTHNESS_WEIGHT = 0.1;   // Neighboring tiles should be similar
+                const CORNER_WEIGHT = 1.5;       // High values in corners is good
+                
+                // Count empty cells (more is better)
+                const emptyCells = countEmptyCells(grid);
+                score += emptyCells * EMPTY_WEIGHT;
+                
+                // Check if highest value is in a corner (preferable)
+                const highestInCorner = isHighestInCorner(grid);
+                if (highestInCorner) {
+                    score += CORNER_WEIGHT * 10;
+                }
+                
+                // Calculate monotonicity (tiles should be in ascending/descending order)
+                const monotonicity = calculateMonotonicity(grid);
+                score += monotonicity * MONOTONICITY_WEIGHT;
+                
+                // Calculate smoothness (neighboring tiles should have similar values)
+                const smoothness = calculateSmoothness(grid);
+                score += smoothness * SMOOTHNESS_WEIGHT;
+                
+                return score;
+            }
+            
+            function countEmptyCells(grid) {
+                let count = 0;
+                for (let x = 0; x < 4; x++) {
+                    for (let y = 0; y < 4; y++) {
+                        if (!grid[x][y]) count++;
+                    }
+                }
+                return count;
+            }
+            
+            function isHighestInCorner(grid) {
+                // Find the highest value
+                let highest = 0;
+                let highestPos = null;
+                
+                for (let x = 0; x < 4; x++) {
+                    for (let y = 0; y < 4; y++) {
+                        if (grid[x][y] && grid[x][y].value > highest) {
+                            highest = grid[x][y].value;
+                            highestPos = {x, y};
+                        }
+                    }
+                }
+                
+                // Check if it's in a corner
+                if (highestPos) {
+                    return (highestPos.x === 0 && highestPos.y === 0) || 
+                           (highestPos.x === 0 && highestPos.y === 3) || 
+                           (highestPos.x === 3 && highestPos.y === 0) || 
+                           (highestPos.x === 3 && highestPos.y === 3);
+                }
+                
+                return false;
+            }
+            
+            function calculateMonotonicity(grid) {
+                // Check for ascending/descending patterns in rows and columns
+                let score = 0;
+                
+                // Check rows
+                for (let x = 0; x < 4; x++) {
+                    let isIncreasing = true;
+                    let isDecreasing = true;
+                    
+                    for (let y = 1; y < 4; y++) {
+                        const prev = grid[x][y-1] ? grid[x][y-1].value : 0;
+                        const curr = grid[x][y] ? grid[x][y].value : 0;
+                        
+                        if (curr < prev) isIncreasing = false;
+                        if (curr > prev) isDecreasing = false;
+                    }
+                    
+                    if (isIncreasing || isDecreasing) score += 10;
+                }
+                
+                // Check columns
+                for (let y = 0; y < 4; y++) {
+                    let isIncreasing = true;
+                    let isDecreasing = true;
+                    
+                    for (let x = 1; x < 4; x++) {
+                        const prev = grid[x-1][y] ? grid[x-1][y].value : 0;
+                        const curr = grid[x][y] ? grid[x][y].value : 0;
+                        
+                        if (curr < prev) isIncreasing = false;
+                        if (curr > prev) isDecreasing = false;
+                    }
+                    
+                    if (isIncreasing || isDecreasing) score += 10;
+                }
+                
+                return score;
+            }
+            
+            function calculateSmoothness(grid) {
+                let score = 0;
+                
+                for (let x = 0; x < 4; x++) {
+                    for (let y = 0; y < 4; y++) {
+                        if (!grid[x][y]) continue;
+                        
+                        // Check horizontal neighbor
+                        if (y < 3 && grid[x][y+1]) {
+                            const diff = Math.abs(Math.log2(grid[x][y].value) - Math.log2(grid[x][y+1].value));
+                            score -= diff;
+                        }
+                        
+                        // Check vertical neighbor
+                        if (x < 3 && grid[x+1][y]) {
+                            const diff = Math.abs(Math.log2(grid[x][y].value) - Math.log2(grid[x+1][y].value));
+                            score -= diff;
+                        }
+                    }
+                }
+                
+                return score;
+            }
         });
     </script>
 </head>
@@ -276,5 +576,31 @@
     <script src="2048-master/js/game_manager.js"></script>
     <script src="2048-master/js/application.js"></script>
     <script src="theme.js"></script>
+    
+    <script>
+        // Capture the GameManager when it's created
+        (function() {
+            // Keep reference to the original GameManager constructor
+            const originalGameManager = window.GameManager;
+            
+            // Replace with our wrapped version
+            window.GameManager = function(size, InputManager, Actuator, StorageManager) {
+                // Create game manager instance
+                const instance = new originalGameManager(size, InputManager, Actuator, StorageManager);
+                
+                // Store reference to it globally
+                window.gameManager = instance;
+                
+                return instance;
+            };
+            
+            // Copy prototype methods
+            for (const prop in originalGameManager.prototype) {
+                if (originalGameManager.prototype.hasOwnProperty(prop)) {
+                    window.GameManager.prototype[prop] = originalGameManager.prototype[prop];
+                }
+            }
+        })();
+    </script>
 </body>
 </html> 
