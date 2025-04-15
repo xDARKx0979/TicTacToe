@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark-mode">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,8 +55,8 @@
             color: #f9f6f2 !important;
         }
         
-        /* Override the body color directly for dark mode */
-        body {
+        /* Only apply dark background in dark mode */
+        body.dark-mode {
             background-color: #121212 !important;
         }
         
@@ -91,22 +91,26 @@
             background: #444 !important;
         }
         
-        /* Force override to bypass the original CSS */
-        #container.container {
+        /* Force override container in dark mode */
+        body.dark-mode #container.container {
             background: #1e1e1e !important;
         }
     </style>
     <script>
-        // Force dark mode on page load
+        // Check theme on page load
         document.addEventListener('DOMContentLoaded', function() {
-            document.documentElement.classList.add('dark-mode');
-            document.body.classList.add('dark-mode');
-            
-            // Apply dark mode to the container
-            const container = document.querySelector('.container');
-            if (container) {
-                container.id = 'container'; // Add ID for easier targeting
-                container.style.backgroundColor = '#1e1e1e';
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                document.body.classList.add('dark-mode');
+                
+                // Apply dark mode to the container
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.id = 'container'; // Add ID for easier targeting
+                    container.style.backgroundColor = '#1e1e1e';
+                }
             }
         });
     </script>
