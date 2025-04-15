@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="2048-master/style/main.css">
     <style>
         .game-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
+            background: transparent !important;
         }
         
         .back-button {
@@ -19,8 +20,26 @@
         
         .container {
             padding: 0;
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
+        }
+        
+        .grid-container {
+            width: 500px;
+            height: 500px;
+            margin: 0 auto;
+        }
+        
+        .grid-cell {
+            width: 106.25px;
+            height: 106.25px;
+            margin: 15px;
+        }
+        
+        .tile {
+            width: 106.25px;
+            height: 106.25px;
+            line-height: 106.25px;
         }
         
         /* Dark mode overrides */
@@ -29,12 +48,16 @@
             color: var(--text-color);
         }
         
+        body.dark-mode {
+            background-color: var(--bg-color);
+        }
+        
         body.dark-mode .grid-container {
             background: #333;
         }
         
         body.dark-mode .grid-cell {
-            background: rgba(238, 228, 218, 0.15);
+            background: rgba(50, 50, 50, 0.35);
         }
         
         body.dark-mode .tile-container .tile {
@@ -87,6 +110,10 @@
         }
         
         /* Tile colors in dark mode */
+        body.dark-mode .tile .tile-inner {
+            box-shadow: none;
+        }
+        
         body.dark-mode .tile.tile-2 .tile-inner {
             background: #554f47;
             color: #f9f6f2;
@@ -133,15 +160,11 @@
             background: #3a281c;
         }
         
-        @media (max-width: 520px) {
-            .game-container {
-                width: 280px;
+        @media (max-width: 650px) {
+            .container, .game-container {
+                width: 100%;
+                max-width: 500px;
                 margin: 0 auto;
-            }
-            
-            .grid-cell {
-                width: 65px;
-                height: 65px;
             }
             
             .grid-container {
@@ -149,10 +172,16 @@
                 height: 280px;
             }
             
+            .grid-cell {
+                width: 56.25px;
+                height: 56.25px;
+                margin: 8px;
+            }
+            
             .tile {
-                width: 65px;
-                height: 65px;
-                line-height: 65px;
+                width: 56.25px;
+                height: 56.25px;
+                line-height: 56.25px;
             }
             
             .tile.tile-2 .tile-inner {
