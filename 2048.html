@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2048</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="2048-master/style/main.css">
     <style id="theme-override"></style>
     <script>
         // Immediately check if dark mode is active and apply overrides
@@ -79,6 +78,8 @@
             padding: 0;
             position: absolute;
             z-index: 1;
+            background: #bbada0;
+            border-radius: 6px;
         }
         
         .grid-row {
@@ -98,6 +99,7 @@
             margin-right: 15px;
             float: left;
             border-radius: 3px;
+            background: rgba(238, 228, 218, 0.35);
         }
         
         .grid-cell:last-child {
@@ -123,6 +125,166 @@
             line-height: 100px;
             border-radius: 3px;
             font-size: 55px;
+            font-weight: bold;
+            text-align: center;
+            color: #776e65;
+            background: #eee4da;
+        }
+        
+        .score-container, .best-container {
+            position: relative;
+            display: inline-block;
+            background: #bbada0;
+            padding: 15px 25px;
+            font-size: 25px;
+            height: 25px;
+            line-height: 25px;
+            font-weight: bold;
+            border-radius: 3px;
+            color: white;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 80px;
+            font-weight: bold;
+            margin: 0;
+            display: block;
+            color: #776e65;
+        }
+        
+        .restart-button {
+            display: inline-block;
+            background: #8f7a66;
+            border-radius: 3px;
+            padding: 0 20px;
+            color: #f9f6f2;
+            height: 40px;
+            line-height: 42px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Dark mode overrides - extremely specific and aggressive */
+        body.dark-mode {
+            background-color: var(--bg-color) !important;
+        }
+        
+        body.dark-mode .container {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color) !important;
+            box-shadow: none !important;
+        }
+        
+        body.dark-mode .grid-container {
+            background: #1e1e1e !important;
+        }
+        
+        body.dark-mode .grid-cell {
+            background: rgba(70, 70, 70, 0.35) !important;
+        }
+        
+        body.dark-mode .title {
+            color: var(--text-color) !important;
+        }
+        
+        body.dark-mode .game-intro {
+            color: var(--text-color) !important;
+        }
+        
+        body.dark-mode .game-explanation {
+            color: var(--text-color) !important;
+        }
+        
+        body.dark-mode .score-container, 
+        body.dark-mode .best-container {
+            background: #444 !important;
+            color: var(--text-color) !important;
+        }
+        
+        body.dark-mode .restart-button {
+            background: #565656 !important;
+            color: white !important;
+        }
+        
+        body.dark-mode .restart-button:hover {
+            background: #676767 !important;
+        }
+        
+        body.dark-mode .game-message {
+            background: rgba(20, 20, 20, 0.9) !important;
+            color: white !important;
+        }
+        
+        body.dark-mode .game-message .lower .keep-playing-button {
+            background: #565656 !important;
+            color: white !important;
+        }
+        
+        body.dark-mode .game-message .lower .retry-button {
+            background: #8f7a66 !important;
+            color: white !important;
+        }
+        
+        /* Tile colors in dark mode */
+        body.dark-mode .tile .tile-inner {
+            box-shadow: none !important;
+        }
+        
+        body.dark-mode .tile.tile-2 .tile-inner {
+            background: #554f47 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-4 .tile-inner {
+            background: #5f5b52 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-8 .tile-inner {
+            background: #955422 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-16 .tile-inner {
+            background: #a54c17 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-32 .tile-inner {
+            background: #b54010 !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-64 .tile-inner {
+            background: #c03a0a !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-128 .tile-inner {
+            background: #7a685c !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-256 .tile-inner {
+            background: #6a584c !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-512 .tile-inner {
+            background: #5a483c !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-1024 .tile-inner {
+            background: #4a382c !important;
+            color: #f9f6f2 !important;
+        }
+        
+        body.dark-mode .tile.tile-2048 .tile-inner {
+            background: #3a281c !important;
+            color: #f9f6f2 !important;
         }
         
         /* Position adjustments for tiles */
@@ -146,142 +308,8 @@
         .tile.tile-position-4-3 { transform: translate(345px, 230px) !important; }
         .tile.tile-position-4-4 { transform: translate(345px, 345px) !important; }
         
-        /* Mobile adjustments */
-        @media (max-width: 650px) {
-            .tile.tile-position-1-1 { transform: translate(0px, 0px) !important; }
-            .tile.tile-position-1-2 { transform: translate(0px, 70px) !important; }
-            .tile.tile-position-1-3 { transform: translate(0px, 140px) !important; }
-            .tile.tile-position-1-4 { transform: translate(0px, 210px) !important; }
-            
-            .tile.tile-position-2-1 { transform: translate(70px, 0px) !important; }
-            .tile.tile-position-2-2 { transform: translate(70px, 70px) !important; }
-            .tile.tile-position-2-3 { transform: translate(70px, 140px) !important; }
-            .tile.tile-position-2-4 { transform: translate(70px, 210px) !important; }
-            
-            .tile.tile-position-3-1 { transform: translate(140px, 0px) !important; }
-            .tile.tile-position-3-2 { transform: translate(140px, 70px) !important; }
-            .tile.tile-position-3-3 { transform: translate(140px, 140px) !important; }
-            .tile.tile-position-3-4 { transform: translate(140px, 210px) !important; }
-            
-            .tile.tile-position-4-1 { transform: translate(210px, 0px) !important; }
-            .tile.tile-position-4-2 { transform: translate(210px, 70px) !important; }
-            .tile.tile-position-4-3 { transform: translate(210px, 140px) !important; }
-            .tile.tile-position-4-4 { transform: translate(210px, 210px) !important; }
-        }
-        
         .game-explanation {
             margin-top: 480px;
-        }
-        
-        /* Dark mode overrides */
-        body.dark-mode {
-            background-color: var(--bg-color);
-        }
-        
-        body.dark-mode .container {
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-        
-        body.dark-mode .grid-container {
-            background: #1e1e1e;
-            border-radius: 6px;
-        }
-        
-        body.dark-mode .grid-cell {
-            background: rgba(70, 70, 70, 0.35);
-        }
-        
-        body.dark-mode .tile .tile-inner {
-            box-shadow: none;
-        }
-        
-        body.dark-mode .game-message {
-            background: rgba(20, 20, 20, 0.9);
-            color: white;
-        }
-        
-        body.dark-mode .score-container, 
-        body.dark-mode .best-container {
-            background: #444;
-        }
-        
-        body.dark-mode .title {
-            color: var(--text-color);
-        }
-        
-        body.dark-mode .game-intro {
-            color: var(--text-color);
-        }
-        
-        body.dark-mode .game-explanation {
-            color: var(--text-color);
-        }
-        
-        body.dark-mode .restart-button {
-            background: #565656;
-            color: white;
-        }
-        
-        body.dark-mode .restart-button:hover {
-            background: #676767;
-        }
-        
-        body.dark-mode .keep-playing-button {
-            background: #565656;
-            color: white;
-        }
-        
-        body.dark-mode .retry-button {
-            background: #8f7a66;
-            color: white;
-        }
-        
-        /* Tile colors in dark mode */
-        body.dark-mode .tile.tile-2 .tile-inner {
-            background: #554f47;
-            color: #f9f6f2;
-        }
-        
-        body.dark-mode .tile.tile-4 .tile-inner {
-            background: #5f5b52;
-            color: #f9f6f2;
-        }
-        
-        body.dark-mode .tile.tile-8 .tile-inner {
-            background: #955422;
-        }
-        
-        body.dark-mode .tile.tile-16 .tile-inner {
-            background: #a54c17;
-        }
-        
-        body.dark-mode .tile.tile-32 .tile-inner {
-            background: #b54010;
-        }
-        
-        body.dark-mode .tile.tile-64 .tile-inner {
-            background: #c03a0a;
-        }
-        
-        body.dark-mode .tile.tile-128 .tile-inner {
-            background: #7a685c;
-        }
-        
-        body.dark-mode .tile.tile-256 .tile-inner {
-            background: #6a584c;
-        }
-        
-        body.dark-mode .tile.tile-512 .tile-inner {
-            background: #5a483c;
-        }
-        
-        body.dark-mode .tile.tile-1024 .tile-inner {
-            background: #4a382c;
-        }
-        
-        body.dark-mode .tile.tile-2048 .tile-inner {
-            background: #3a281c;
         }
         
         @media (max-width: 650px) {
@@ -336,47 +364,38 @@
             .game-explanation {
                 margin-top: 320px;
             }
-        }
-        
-        /* Force override any conflicting styles */
-        html.dark-mode, body.dark-mode {
-            background-color: var(--bg-color) !important;
-        }
-        
-        html.dark-mode body, body.dark-mode .container, body.dark-mode .heading, 
-        body.dark-mode .above-game, body.dark-mode .game-explanation {
-            background-color: var(--bg-color) !important;
-            color: var(--text-color) !important;
-        }
-        
-        /* Additional overrides to fix dark mode */
-        .dark-mode .container {
-            background-color: var(--bg-color) !important;
-            box-shadow: none !important;
-        }
-        
-        .dark-mode .heading {
-            background-color: var(--bg-color) !important;
-        }
-        
-        .dark-mode .game-container {
-            background-color: var(--bg-color) !important;
-        }
-        
-        .dark-mode .title {
-            color: var(--text-color) !important;
-        }
-        
-        .dark-mode .game-intro {
-            color: var(--text-color) !important;
-        }
-        
-        /* Override the original 2048 main.css styles */
-        @media (prefers-color-scheme: dark) {
-            .dark-mode.container {
-                background: var(--bg-color) !important;
-                color: var(--text-color) !important;
+            
+            .title {
+                font-size: 40px;
             }
+            
+            .score-container, .best-container {
+                padding: 10px 15px;
+                font-size: 18px;
+                height: 18px;
+                line-height: 18px;
+            }
+            
+            /* Mobile positioning for tiles */
+            .tile.tile-position-1-1 { transform: translate(0px, 0px) !important; }
+            .tile.tile-position-1-2 { transform: translate(0px, 70px) !important; }
+            .tile.tile-position-1-3 { transform: translate(0px, 140px) !important; }
+            .tile.tile-position-1-4 { transform: translate(0px, 210px) !important; }
+            
+            .tile.tile-position-2-1 { transform: translate(70px, 0px) !important; }
+            .tile.tile-position-2-2 { transform: translate(70px, 70px) !important; }
+            .tile.tile-position-2-3 { transform: translate(70px, 140px) !important; }
+            .tile.tile-position-2-4 { transform: translate(70px, 210px) !important; }
+            
+            .tile.tile-position-3-1 { transform: translate(140px, 0px) !important; }
+            .tile.tile-position-3-2 { transform: translate(140px, 70px) !important; }
+            .tile.tile-position-3-3 { transform: translate(140px, 140px) !important; }
+            .tile.tile-position-3-4 { transform: translate(140px, 210px) !important; }
+            
+            .tile.tile-position-4-1 { transform: translate(210px, 0px) !important; }
+            .tile.tile-position-4-2 { transform: translate(210px, 70px) !important; }
+            .tile.tile-position-4-3 { transform: translate(210px, 140px) !important; }
+            .tile.tile-position-4-4 { transform: translate(210px, 210px) !important; }
         }
     </style>
 </head>
