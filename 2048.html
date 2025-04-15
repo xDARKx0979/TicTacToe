@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark-mode">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2048</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20240617">
     <style id="theme-override"></style>
     <script>
         // Immediately check if dark mode is active and apply overrides
@@ -47,6 +47,33 @@
         body {
             background-color: #faf8ef;
             transition: background-color 0.3s ease;
+        }
+        
+        .support-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f96854;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+        
+        .support-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .support-button svg {
+            width: 20px;
+            height: 20px;
         }
         
         .game-container {
@@ -400,6 +427,13 @@
     </style>
 </head>
 <body>
+    <a href="https://patreon.com/Dark0979?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink" target="_blank" class="support-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
+        </svg>
+        Support Creator
+    </a>
+
     <div class="container">
         <a href="index.html" class="back-button">← Back to Games</a>
         
