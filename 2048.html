@@ -23,6 +23,116 @@
             margin: 0 auto;
         }
         
+        /* Dark mode overrides */
+        body.dark-mode .container {
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        body.dark-mode .grid-container {
+            background: #333;
+        }
+        
+        body.dark-mode .grid-cell {
+            background: rgba(238, 228, 218, 0.15);
+        }
+        
+        body.dark-mode .tile-container .tile {
+            background: #444;
+        }
+        
+        body.dark-mode .game-message {
+            background: rgba(20, 20, 20, 0.9);
+            color: white;
+        }
+        
+        body.dark-mode .tile-new {
+            background: #444;
+        }
+        
+        body.dark-mode .score-container, 
+        body.dark-mode .best-container {
+            background: #444;
+        }
+        
+        body.dark-mode .title {
+            color: var(--text-color);
+        }
+        
+        body.dark-mode .game-intro {
+            color: var(--text-color);
+        }
+        
+        body.dark-mode .game-explanation {
+            color: var(--text-color);
+        }
+        
+        body.dark-mode .restart-button {
+            background: #565656;
+            color: white;
+        }
+        
+        body.dark-mode .restart-button:hover {
+            background: #676767;
+        }
+        
+        body.dark-mode .keep-playing-button {
+            background: #565656;
+            color: white;
+        }
+        
+        body.dark-mode .retry-button {
+            background: #8f7a66;
+            color: white;
+        }
+        
+        /* Tile colors in dark mode */
+        body.dark-mode .tile.tile-2 .tile-inner {
+            background: #554f47;
+            color: #f9f6f2;
+        }
+        
+        body.dark-mode .tile.tile-4 .tile-inner {
+            background: #5f5b52;
+            color: #f9f6f2;
+        }
+        
+        body.dark-mode .tile.tile-8 .tile-inner {
+            background: #955422;
+        }
+        
+        body.dark-mode .tile.tile-16 .tile-inner {
+            background: #a54c17;
+        }
+        
+        body.dark-mode .tile.tile-32 .tile-inner {
+            background: #b54010;
+        }
+        
+        body.dark-mode .tile.tile-64 .tile-inner {
+            background: #c03a0a;
+        }
+        
+        body.dark-mode .tile.tile-128 .tile-inner {
+            background: #7a685c;
+        }
+        
+        body.dark-mode .tile.tile-256 .tile-inner {
+            background: #6a584c;
+        }
+        
+        body.dark-mode .tile.tile-512 .tile-inner {
+            background: #5a483c;
+        }
+        
+        body.dark-mode .tile.tile-1024 .tile-inner {
+            background: #4a382c;
+        }
+        
+        body.dark-mode .tile.tile-2048 .tile-inner {
+            background: #3a281c;
+        }
+        
         @media (max-width: 520px) {
             .game-container {
                 width: 280px;
