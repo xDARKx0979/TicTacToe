@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="2048-master/style/main.css">
     <style>
+        body {
+            background-color: #faf8ef;
+            transition: background-color 0.3s ease;
+        }
+        
         .game-container {
             width: 460px;
             height: 460px;
@@ -26,6 +31,8 @@
             padding: 20px;
             margin: 0 auto;
             border-radius: 6px;
+            background-color: #faf8ef;
+            transition: background-color 0.3s ease;
         }
         
         .grid-container {
@@ -291,6 +298,17 @@
             .game-explanation {
                 margin-top: 320px;
             }
+        }
+        
+        /* Force override any conflicting styles */
+        html.dark-mode, body.dark-mode {
+            background-color: var(--bg-color) !important;
+        }
+        
+        html.dark-mode body, body.dark-mode .container, body.dark-mode .heading, 
+        body.dark-mode .above-game, body.dark-mode .game-explanation {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color) !important;
         }
     </style>
 </head>
