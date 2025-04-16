@@ -395,4 +395,74 @@ button:disabled {
 
 [data-theme="dark"] .support-button:hover {
     background-color: #E64A47;
+}
+
+/* Main wrapper for page with ads */
+.page-with-ads {
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+/* Ad containers */
+.ad-container-left,
+.ad-container-right {
+    width: 160px;
+    min-height: 600px;
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ad-container-left {
+    left: 10px;
+}
+
+.ad-container-right {
+    right: 10px;
+}
+
+.ad-slot {
+    background-color: #f1f1f1;
+    border: 1px dashed #ccc;
+    min-height: 250px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Adjust main content width */
+.container.with-ads {
+    max-width: calc(100% - 360px);
+    margin: 0 auto;
+}
+
+/* Hide ads on smaller screens */
+@media (max-width: 1200px) {
+    .ad-container-left,
+    .ad-container-right {
+        display: none;
+    }
+    
+    .container.with-ads {
+        max-width: 1000px;
+    }
+}
+
+/* Dark mode support */
+.dark-mode .ad-slot {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #999;
 } 
