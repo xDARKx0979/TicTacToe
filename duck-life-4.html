@@ -7,6 +7,7 @@
     <!-- Google AdSense Code -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8366001403141760"
      crossorigin="anonymous"></script>
+    <script src="DuckLife4-main/Build/UnityLoader.js"></script>
     <style>
         .game-container {
             width: 100%;
@@ -17,11 +18,7 @@
             border-radius: 5px;
             overflow: hidden;
             position: relative;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+            background-color: #121212;
         }
         .back-button {
             position: absolute;
@@ -43,14 +40,59 @@
         .dark-mode .game-container {
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            text-align: center;
+        }
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
+    <script>
+        var gameInstance = null;
+        function initGame() {
+            // Ensure the Unity loader is ready
+            if (typeof UnityLoader !== 'undefined') {
+                gameInstance = UnityLoader.instantiate("gameContainer", "DuckLife4-main/Build/duck.json", {
+                    onProgress: function (gameInstance, progress) {
+                        if (progress === 1) {
+                            document.getElementById('loading').style.display = 'none';
+                        }
+                    }
+                });
+            } else {
+                console.error("Unity loader not found");
+                document.getElementById('loading-text').innerText = 'Error loading game. Please refresh the page.';
+            }
+        }
+        window.onload = initGame;
+    </script>
 </head>
 <body>
     <div class="container">
         <a href="index.html" class="back-button">← Back to Games</a>
         <h1>Duck Life 4</h1>
         <div class="game-container">
-            <iframe src="DuckLife4-main/index.html" allowfullscreen></iframe>
+            <div id="gameContainer" style="width:100%; height:100%;"></div>
+            <div id="loading" class="loading-indicator">
+                <div class="loading-spinner"></div>
+                <div id="loading-text">Loading Duck Life 4...</div>
+            </div>
         </div>
     </div>
 </body>
