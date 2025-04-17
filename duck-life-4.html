@@ -10,15 +10,19 @@
     <script src="DuckLife4-main/Build/UnityLoader.js"></script>
     <style>
         .game-container {
-            width: 100%;
-            height: calc(100vh - 120px);
-            min-height: 600px;
+            width: 900px; /* Fixed width that works well for this game */
+            height: 600px;
+            max-width: 100%;
             margin: 0 auto;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             border-radius: 5px;
             overflow: hidden;
             position: relative;
             background-color: #121212;
+        }
+        #gameContainer {
+            width: 100% !important;
+            height: 100% !important;
         }
         .back-button {
             position: absolute;
@@ -62,25 +66,54 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .fallback-option {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            display: none;
+        }
+        .fallback-option a {
+            color: #3498db;
+            text-decoration: underline;
+        }
     </style>
     <script>
+        // Show fallback option after 10 seconds if game doesn't load
+        setTimeout(function() {
+            var loadingElement = document.getElementById('loading');
+            if (loadingElement && loadingElement.style.display !== 'none') {
+                document.getElementById('fallback-option').style.display = 'block';
+            }
+        }, 10000);
+
         var gameInstance = null;
         function initGame() {
-            // Ensure the Unity loader is ready
-            if (typeof UnityLoader !== 'undefined') {
-                gameInstance = UnityLoader.instantiate("gameContainer", "DuckLife4-main/Build/duck.json", {
-                    onProgress: function (gameInstance, progress) {
-                        if (progress === 1) {
-                            document.getElementById('loading').style.display = 'none';
+            try {
+                // Ensure the Unity loader is ready
+                if (typeof UnityLoader !== 'undefined') {
+                    gameInstance = UnityLoader.instantiate("gameContainer", "DuckLife4-main/Build/duck.json", {
+                        onProgress: function (instance, progress) {
+                            if (progress === 1) {
+                                document.getElementById('loading').style.display = 'none';
+                            }
                         }
-                    }
-                });
-            } else {
-                console.error("Unity loader not found");
+                    });
+                } else {
+                    console.error("Unity loader not found");
+                    document.getElementById('loading-text').innerText = 'Error loading game. Please refresh the page.';
+                    document.getElementById('fallback-option').style.display = 'block';
+                }
+            } catch (e) {
+                console.error("Error initializing game:", e);
                 document.getElementById('loading-text').innerText = 'Error loading game. Please refresh the page.';
+                document.getElementById('fallback-option').style.display = 'block';
             }
         }
-        window.onload = initGame;
+        
+        // Wait for document to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initGame, 500); // Short delay to ensure everything is loaded
+        });
     </script>
 </head>
 <body>
@@ -88,10 +121,14 @@
         <a href="index.html" class="back-button">← Back to Games</a>
         <h1>Duck Life 4</h1>
         <div class="game-container">
-            <div id="gameContainer" style="width:100%; height:100%;"></div>
+            <div id="gameContainer"></div>
             <div id="loading" class="loading-indicator">
                 <div class="loading-spinner"></div>
                 <div id="loading-text">Loading Duck Life 4...</div>
+                <div id="fallback-option" class="fallback-option">
+                    <p>Having trouble loading the game?</p>
+                    <p>Try directly opening <a href="DuckLife4-main/index.html" target="_blank">Duck Life 4 in a new tab</a></p>
+                </div>
             </div>
         </div>
     </div>
