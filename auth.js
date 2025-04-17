@@ -114,31 +114,54 @@ function handleLogin(event) {
     }
 }
 
-// Check Authentication on Page Load
+// Check Authentication on Page Load Function
 function checkAuth() {
     const currentUser = getCurrentUser();
-    const protectedPages = ['index.html', 'papas-restaurant.html', '2048.html', 'tetris.html', 'tictactoe.html', 'run.html', 'krunker.html', 'shellshock.html']; // Add other protected pages
-    const currentPage = window.location.pathname.split('/').pop();
+    // Include all game pages in protectedPages if necessary
+    const protectedPages = [
+        'index.html', 'papas-restaurant.html', '2048.html', 'tetris.html',
+        'tictactoe.html', 'run.html', 'krunker.html', 'shellshock.html',
+        // Add individual Papa's games if they should also be protected directly
+        'games/papas-bakeria.html', 'games/papas-tacomia.html', 'games/papas-sushiria.html', 
+        'games/papas-wingeria.html', 'games/papas-pancakeria.html', 'games/papas-donuteria.html',
+        'games/papas-pizzeria.html', 'games/papas-hotdoggeria.html', 'games/papas-scooperia.html',
+        'games/papa-louie-2.html', 'games/papas-burgeria.html', 'games/papas-cheeseria.html',
+        'games/papas-pastaria.html', 'games/papas-freezeria.html'
+        // Add other game pages like pacman, slope etc. if needed
+    ]; 
+    const pathSegments = window.location.pathname.split('/');
+    // Handle paths like /games/papas-bakeria.html
+    const currentPage = pathSegments.length > 2 && pathSegments[pathSegments.length - 2] === 'games' 
+                        ? `games/${pathSegments.pop()}` 
+                        : pathSegments.pop() || 'index.html'; // Default to index.html if path is just "/"
+
+    // Exclude login/signup pages from the check
+    if (currentPage === 'login.html' || currentPage === 'signup.html') {
+        return;
+    }
 
     // Check if current page is protected and user is not logged in
     if (protectedPages.includes(currentPage) && !currentUser) {
-        // Store the page user was trying to access
-        sessionStorage.setItem('redirectAfterLogin', currentPage);
-        window.location.href = 'login.html'; // Redirect to login
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+        // Use absolute path for redirection to handle cases inside /games/ folder
+        window.location.href = '/login.html'; 
     }
 }
+
+// Run the authentication check immediately when the script loads
+checkAuth();
 
 // Logout Functionality
 function handleLogout() {
     logoutUser();
-    window.location.href = 'login.html'; // Redirect to login page after logout
+    window.location.href = '/login.html'; // Redirect to login page after logout
 }
 
-// --- Event Listeners ---
+// --- Event Listeners (Run after DOM is loaded) ---
 document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signup-form');
     const loginForm = document.getElementById('login-form');
-    const logoutButton = document.getElementById('logout-button'); // We will add this button later
+    const logoutButton = document.getElementById('logout-button');
 
     if (signupForm) {
         signupForm.addEventListener('submit', handleSignup);
@@ -150,12 +173,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutButton) {
         logoutButton.addEventListener('click', handleLogout);
-    }
-
-    // Run auth check on page load for relevant pages (excluding login/signup)
-    if (window.location.pathname.includes('login.html') || window.location.pathname.includes('signup.html')) {
-        // Don't run checkAuth on login/signup pages
-    } else {
-        checkAuth();
     }
 }); 
