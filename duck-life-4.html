@@ -19,10 +19,9 @@
             position: relative;
             background-color: #121212;
         }
-        iframe {
+        #gameContainer {
             width: 100%;
             height: 100%;
-            border: none;
         }
         .back-button {
             position: absolute;
@@ -44,6 +43,28 @@
         .dark-mode .game-container {
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
+        #loadingBox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -51,8 +72,45 @@
         <a href="index.html" class="back-button">← Back to Games</a>
         <h1>Duck Life 4</h1>
         <div class="game-container">
-            <iframe src="DuckLife4-direct.html" allowfullscreen="true" scrolling="no"></iframe>
+            <div id="gameContainer"></div>
+            <div id="loadingBox">
+                <div class="spinner"></div>
+                <div id="loadingText">Loading Duck Life 4...</div>
+            </div>
         </div>
     </div>
+
+    <!-- Load the game scripts -->
+    <script>
+        // First, dynamically load the UnityLoader.js script
+        var script = document.createElement('script');
+        script.src = 'DuckLife4-main/Build/UnityLoader.js';
+        script.onload = function() {
+            console.log('UnityLoader.js loaded successfully!');
+            initGame();
+        };
+        script.onerror = function() {
+            console.error('Failed to load UnityLoader.js');
+            document.getElementById('loadingText').innerHTML = 'Error loading game engine.<br>Please try refreshing the page.';
+        };
+        document.head.appendChild(script);
+
+        // Initialize the game after the script loads
+        function initGame() {
+            if (typeof UnityLoader !== 'undefined') {
+                console.log('Creating game instance...');
+                var gameInstance = UnityLoader.instantiate('gameContainer', 'DuckLife4-main/Build/duck.json', {
+                    onProgress: function(gameInstance, progress) {
+                        if (progress === 1) {
+                            document.getElementById('loadingBox').style.display = 'none';
+                        }
+                    }
+                });
+            } else {
+                console.error('UnityLoader is not defined');
+                document.getElementById('loadingText').innerHTML = 'Error loading game engine.<br>Please try refreshing the page.';
+            }
+        }
+    </script>
 </body>
 </html> 
