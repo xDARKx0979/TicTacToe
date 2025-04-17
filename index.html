@@ -18,121 +18,115 @@
             font-size: 0.9em;
             line-height: 1.4;
         }
+        /* Add style for logout button, similar to support button */
+        .logout-button {
+            position: fixed;
+            top: 15px;
+            right: 180px; /* Adjust position relative to support button */
+            background-color: #dc3545; /* Red color for logout */
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex; /* Use flexbox */
+            align-items: center;
+            font-size: 14px;
+            border: none; /* Make it look like a button */
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #c82333; /* Darker red on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .logout-button svg {
+            margin-right: 8px;
+            height: 18px;
+            width: 18px;
+        }
+
+        /* Adjust support button position if needed */
+        .support-button {
+            right: 15px; /* Ensure it doesn't overlap */
+        }
+        
+        /* Hide buttons if user not logged in (handled by checkAuth redirect mostly) */
+        body:not(.logged-in) .support-button,
+        body:not(.logged-in) .logout-button {
+             /* display: none; /* Optional: hide if not logged in, though redirect handles it */
+        }
     </style>
     <!-- Google AdSense Code -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8366001403141760"
      crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="page-with-ads">
-        <!-- Left sidebar ads -->
-        <div class="ad-container-left">
-            <div class="ad-slot">
-                <!-- Replace this with AdSense code when approved -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="vertical"
-                     data-full-width-responsive="false"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
-            <div class="ad-slot">
-                <!-- Second ad slot -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="vertical"
-                     data-full-width-responsive="false"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
+    <!-- Add Logout Button next to Support Button -->
+    <button id="logout-button" class="logout-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 17v-3H9v-4h7V7l5 5-5 5zM14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9z"/>
+        </svg>
+        Logout
+    </button>
+    <a href="support.html" target="_blank" class="support-button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
+        </svg>
+        Support Creator
+    </a>
+    
+    <div class="container game-selection">
+        <h1>Classic Games</h1>
+        <div class="warning">
+            ⚠️ Note: Krunker.io and Shell Shockers may not work on school or workplace computers due to network restrictions. These games are best played at home or on unrestricted networks.
         </div>
-
-        <!-- Main content -->
-        <div class="container game-selection with-ads">
-            <a href="support.html" target="_blank" class="support-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
-                </svg>
-                Support Creator
+        <div class="game-buttons">
+            <a href="tictactoe.html" class="game-button">
+                <h2>Tic Tac Toe</h2>
+                <p>The classic X and O game</p>
             </a>
-
-            <h1>Classic Games</h1>
-            <div class="warning">
-                ⚠️ Note: Krunker.io and Shell Shockers may not work on school or workplace computers due to network restrictions. These games are best played at home or on unrestricted networks.
-            </div>
-            <div class="game-buttons">
-                <a href="tictactoe.html" class="game-button">
-                    <h2>Tic Tac Toe</h2>
-                    <p>The classic X and O game</p>
-                </a>
-                <a href="tetris.html" class="game-button">
-                    <h2>Tetris</h2>
-                    <p>Stack blocks and clear lines</p>
-                </a>
-                <a href="slope/index.html" class="game-button">
-                    <h2>Slope</h2>
-                    <p>Roll down an endless 3D slope</p>
-                </a>
-                <a href="pacman/pacman-master/index.html" class="game-button">
-                    <h2>Pac-Man</h2>
-                    <p>Navigate mazes and eat dots</p>
-                </a>
-                <a href="run.html" class="game-button">
-                    <h2>Run 3</h2>
-                    <p>Run through space tunnels</p>
-                </a>
-                <a href="krunker.html" class="game-button">
-                    <h2>Krunker.io</h2>
-                    <p>Fast-paced FPS shooter game</p>
-                </a>
-                <a href="shellshock.html" class="game-button">
-                    <h2>Shell Shockers</h2>
-                    <p>Online multiplayer shooter</p>
-                </a>
-                <a href="papas-restaurant.html" class="game-button">
-                    <h2>Papa's Games</h2>
-                    <p>Collection of Papa Louie games</p>
-                </a>
-                <a href="2048.html" class="game-button">
-                    <h2>2048</h2>
-                    <p>Slide and merge the tiles</p>
-                </a>
-            </div>
-        </div>
-
-        <!-- Right sidebar ads -->
-        <div class="ad-container-right">
-            <div class="ad-slot">
-                <!-- Replace this with AdSense code when approved -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="vertical"
-                     data-full-width-responsive="false"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
-            <div class="ad-slot">
-                <!-- Second ad slot -->
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX"
-                     data-ad-format="vertical"
-                     data-full-width-responsive="false"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
+            <a href="tetris.html" class="game-button">
+                <h2>Tetris</h2>
+                <p>Stack blocks and clear lines</p>
+            </a>
+            <a href="slope/index.html" class="game-button">
+                <h2>Slope</h2>
+                <p>Roll down an endless 3D slope</p>
+            </a>
+            <a href="pacman/pacman-master/index.html" class="game-button">
+                <h2>Pac-Man</h2>
+                <p>Navigate mazes and eat dots</p>
+            </a>
+            <a href="run.html" class="game-button">
+                <h2>Run 3</h2>
+                <p>Run through space tunnels</p>
+            </a>
+            <a href="krunker.html" class="game-button">
+                <h2>Krunker.io</h2>
+                <p>Fast-paced FPS shooter game</p>
+            </a>
+            <a href="shellshock.html" class="game-button">
+                <h2>Shell Shockers</h2>
+                <p>Online multiplayer shooter</p>
+            </a>
+            <a href="papas-restaurant.html" class="game-button">
+                <h2>Papa's Games</h2>
+                <p>Collection of Papa Louie games</p>
+            </a>
+            <a href="2048.html" class="game-button">
+                <h2>2048</h2>
+                <p>Slide and merge the tiles</p>
+            </a>
         </div>
     </div>
+
+    <script src="theme.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html> 

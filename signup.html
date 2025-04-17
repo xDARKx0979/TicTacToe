@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .auth-container h1 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        .auth-form button:hover {
+            background: var(--primary-hover-color);
+        }
+        .auth-container p {
+            margin-top: 20px;
+            color: var(--text-light);
+        }
+        .auth-container a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .auth-container a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #dc3545; /* Bootstrap danger color */
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1>Create Account</h1>
+        <form id="signup-form" class="auth-form">
+            <div id="signup-error" class="error-message"></div>
+            <input type="email" id="signup-email" placeholder="Email" required>
+            <input type="password" id="signup-password" placeholder="Password" required>
+            <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Log In</a></p>
+    </div>
+    <script src="auth.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html> 

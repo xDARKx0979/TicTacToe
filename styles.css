@@ -78,13 +78,17 @@
 
 body {
     font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: var(--background-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
     color: var(--text-color);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.6;
+    /* Remove flex properties if they cause issues with layout */
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    /* min-height: 100vh; */
 }
 
 .container {
@@ -397,72 +401,87 @@ button:disabled {
     background-color: #E64A47;
 }
 
-/* Main wrapper for page with ads */
+/* Ad Container Styles - Commented Out */
+/*
 .page-with-ads {
     display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    width: 100%;
-    position: relative;
+    justify-content: space-between; 
+    padding: 0 20px; 
 }
 
-/* Ad containers */
 .ad-container-left,
 .ad-container-right {
-    width: 160px;
-    min-height: 600px;
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 100;
+    width: 180px; 
     display: flex;
     flex-direction: column;
     gap: 20px;
-}
-
-.ad-container-left {
-    left: 10px;
-}
-
-.ad-container-right {
-    right: 10px;
+    padding-top: 100px; 
 }
 
 .ad-slot {
-    background-color: #f1f1f1;
-    border: 1px dashed #ccc;
-    min-height: 250px;
-    width: 100%;
+    width: 160px;
+    height: 600px;
+    background: var(--ad-slot-bg);
+    border: 1px dashed var(--border-color);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 12px;
-    color: #666;
-    text-align: center;
-    overflow: hidden;
-}
-
-/* Adjust main content width */
-.container.with-ads {
-    max-width: calc(100% - 360px);
+    color: var(--text-light);
     margin: 0 auto;
 }
 
-/* Hide ads on smaller screens */
+
+.game-selection.with-ads {
+    flex-grow: 1; 
+    max-width: calc(100% - 400px); 
+    margin: 0 auto; 
+}
+
 @media (max-width: 1200px) {
     .ad-container-left,
     .ad-container-right {
-        display: none;
+        width: 140px; 
     }
-    
-    .container.with-ads {
-        max-width: 1000px;
+    .ad-slot {
+        width: 120px; 
+        height: 500px;
+    }
+    .game-selection.with-ads {
+        max-width: calc(100% - 320px);
     }
 }
 
-/* Dark mode support */
-.dark-mode .ad-slot {
-    background-color: #2a2a2a;
-    border-color: #444;
-    color: #999;
-} 
+@media (max-width: 992px) {
+    .page-with-ads {
+        padding: 0 10px;
+    }
+    .ad-container-left,
+    .ad-container-right {
+        display: none; 
+    }
+    .game-selection.with-ads {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+}
+*/
+
+/* Existing styles below */
+/* General body styling */
+/* ... existing code ... */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.6;
+    /* Remove flex properties if they cause issues with layout */
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    /* min-height: 100vh; */
+}
+
+/* ... rest of existing styles ... */ 
