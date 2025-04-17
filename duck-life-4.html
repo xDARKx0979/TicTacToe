@@ -17,100 +17,36 @@
             border-radius: 5px;
             overflow: hidden;
             position: relative;
-            background-color: #121212;
         }
-        #gameContainer {
+        iframe {
             width: 100%;
             height: 100%;
-        }
-        .back-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        .back-button:hover {
-            background-color: rgba(0, 0, 0, 0.8);
+            display: block;
         }
         .dark-mode .game-container {
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
-        #loadingBox {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-family: Arial, sans-serif;
+        .direct-link {
             text-align: center;
+            margin-top: 20px;
         }
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .direct-link a {
+            color: #3498db;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-button">← Back to Games</a>
+        <a href="index.html" class="back-btn">← Back to Games</a>
         <h1>Duck Life 4</h1>
         <div class="game-container">
-            <div id="gameContainer"></div>
-            <div id="loadingBox">
-                <div class="spinner"></div>
-                <div id="loadingText">Loading Duck Life 4...</div>
-            </div>
+            <iframe src="DuckLife4-main/index.html" allowfullscreen="true" scrolling="no" allow="fullscreen; autoplay"></iframe>
+        </div>
+        <div class="direct-link">
+            <p>If the game doesn't load, <a href="DuckLife4-main/index.html" target="_blank">click here to open directly in a new tab</a>.</p>
         </div>
     </div>
-
-    <!-- Load the game scripts -->
-    <script>
-        // First, dynamically load the UnityLoader.js script
-        var script = document.createElement('script');
-        script.src = 'DuckLife4-main/Build/UnityLoader.js';
-        script.onload = function() {
-            console.log('UnityLoader.js loaded successfully!');
-            initGame();
-        };
-        script.onerror = function() {
-            console.error('Failed to load UnityLoader.js');
-            document.getElementById('loadingText').innerHTML = 'Error loading game engine.<br>Please try refreshing the page.';
-        };
-        document.head.appendChild(script);
-
-        // Initialize the game after the script loads
-        function initGame() {
-            if (typeof UnityLoader !== 'undefined') {
-                console.log('Creating game instance...');
-                var gameInstance = UnityLoader.instantiate('gameContainer', 'DuckLife4-main/Build/duck.json', {
-                    onProgress: function(gameInstance, progress) {
-                        if (progress === 1) {
-                            document.getElementById('loadingBox').style.display = 'none';
-                        }
-                    }
-                });
-            } else {
-                console.error('UnityLoader is not defined');
-                document.getElementById('loadingText').innerHTML = 'Error loading game engine.<br>Please try refreshing the page.';
-            }
-        }
-    </script>
 </body>
 </html> 
