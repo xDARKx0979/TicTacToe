@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Options</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .support-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .support-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .support-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .support-option {
+            flex: 1;
+            min-width: 250px;
+            background: var(--button-bg);
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .support-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .support-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .support-option h3 {
+            margin: 0 0 10px 0;
+            color: var(--text-color);
+        }
+        
+        .support-option p {
+            margin: 0 0 20px 0;
+            color: var(--text-light);
+        }
+        
+        .support-link {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: auto;
+            transition: background 0.2s;
+        }
+        
+        .support-link:hover {
+            background: #0056b3;
+        }
+        
+        .patreon-link {
+            background: #F96854;
+        }
+        
+        .patreon-link:hover {
+            background: #e04c36;
+        }
+        
+        .cashapp-link {
+            background: #00D632;
+        }
+        
+        .cashapp-link:hover {
+            background: #00b12a;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to Games</a>
+        
+        <div class="support-container">
+            <div class="support-header">
+                <h1>Support the Creator</h1>
+                <p>Thank you for considering supporting the development of these games! Choose one of the options below:</p>
+            </div>
+            
+            <div class="support-options">
+                <div class="support-option">
+                    <svg class="support-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F96854">
+                        <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
+                    </svg>
+                    <h3>Patreon</h3>
+                    <p>Support through monthly donations and get access to exclusive content and updates.</p>
+                    <a href="https://patreon.com/Dark0979?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink" target="_blank" class="support-link patreon-link">Support on Patreon</a>
+                </div>
+                
+                <div class="support-option">
+                    <svg class="support-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#00D632">
+                        <path d="M22.5 4.5c0-1.5-1.01-2.31-2.5-2.5H4c-1.5.19-2.5 1-2.5 2.5v15c0 1.5 1 2.31 2.5 2.5h16c1.5-.19 2.5-1 2.5-2.5v-15zm-6 3.5c0 .55-.45 1-1 1h-7c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h7c.55 0 1 .45 1 1v1zm-1 8.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-7.5-2c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/>
+                    </svg>
+                    <h3>Cash App</h3>
+                    <p>Make a one-time donation quickly and easily through Cash App.</p>
+                    <a href="https://cash.app/$xdarkx0979" target="_blank" class="support-link cashapp-link">Donate with Cash App</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="theme.js"></script>
+</body>
+</html> 
