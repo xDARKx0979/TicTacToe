@@ -84,11 +84,11 @@ body {
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     line-height: 1.6;
-    /* Remove flex properties if they cause issues with layout */
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
-    /* min-height: 100vh; */
+    /* Restore flex properties for centering */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
@@ -477,11 +477,11 @@ body {
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
     line-height: 1.6;
-    /* Remove flex properties if they cause issues with layout */
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
-    /* min-height: 100vh; */
+    /* Restore flex properties for centering */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 /* ... rest of existing styles ... */ 
