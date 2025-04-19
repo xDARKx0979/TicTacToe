@@ -208,7 +208,7 @@ fbAuth.onAuthStateChanged((user) => {
         if (!user.emailVerified) {
             console.log('>>> User email NOT verified.');
             // Display persistent message
-            displayError('auth-message', 'Please check your email and click the verification link to complete signup.'); 
+            displayError('auth-message', 'Email address not verified. Please click the link in the verification email sent to you. If you just verified, try logging in again.'); 
             // Show the resend button IF on the login page
             if (isLoginPage && resendButton) {
                 resendButton.style.display = 'block'; // Or 'inline-block' depending on styling
