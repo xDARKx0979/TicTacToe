@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eaglercraft</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling on the main page */
+            background-color: var(--background-color); /* Match site background */
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        /* Hide potential back button/title from parent page to give full space */
+        body > h1, body > .back-button { 
+             display: none; 
+        }
+    </style>
+</head>
+<body>
+    <!-- This iframe assumes the Eaglercraft client files are placed in 
+         a folder named 'eaglercraft-client' at the root of your project,
+         and the main entry point is 'index.html' inside that folder. -->
+    <iframe src="../eaglercraft-client/index.html" 
+            title="Eaglercraft Client" 
+            allow="fullscreen; pointer-lock"> <!-- Permissions needed -->
+    </iframe>
+
+    <!-- Firebase/Auth scripts are omitted here as the iframe content 
+         will handle its own logic, and this parent page doesn't need protection itself,
+         it just loads the client which might be accessed directly anyway. 
+         If direct access to the client folder needs protection, that's more complex. -->
+     <!-- <script src="../firebase-init.js"></script> -->
+     <!-- <script src="../auth.js"></script> -->
+     <!-- <script src="../theme.js"></script> -->
+</body>
+</html> 
