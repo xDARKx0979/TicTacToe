@@ -31,8 +31,8 @@ function isAuthPage(path) {
     const resetPath = '/reset-password';
     return path === loginPath || path === loginPath + '.html' || 
            path === signupPath || path === signupPath + '.html' || 
-           path === resetPath || path === resetPath + '.html' || 
-           path === '/';
+           path === resetPath || path === resetPath + '.html';
+    // Removed '/' so homepage requires authentication
 }
 
 // --- Attempt to clear old insecure data ---
