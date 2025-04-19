@@ -7,13 +7,13 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Survey Results: Allow any authenticated user to update the aggregate count,
-    // and any authenticated user to read it (admin page JS filters access).
-    // For better security, restrict read access using custom claims or a known admin UID.
+    // Survey Results: 
+    // - Allow ANY authenticated user to update/create (when submitting survey).
+    // - Allow ONLY the specific admin UID to read the results.
     match /surveyResults/aggregate {
-      allow read, update: if request.auth != null;
-      // Allow create only if it doesn't exist yet (first vote)
-      allow create: if request.auth != null && !exists(/databases/$(database)/documents/surveyResults/aggregate);
+      allow read: if request.auth != null && request.auth.uid == 'II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2'; // <<< RESTRICT READ TO ADMIN UID
+      allow update: if request.auth != null; // Any logged-in user can increment
+      allow create: if request.auth != null && !exists(/databases/$(database)/documents/surveyResults/aggregate); // Can be created by first voter
     }
   }
 } 

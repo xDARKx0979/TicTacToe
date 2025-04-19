@@ -3,7 +3,7 @@ const fbAuth = firebase.auth();
 const db = firebase.firestore();
 
 // --- CONFIGURATION ---
-const ADMIN_EMAIL = "YOUR_ADMIN_EMAIL_HERE"; // <<< IMPORTANT: Replace with your email address
+const ADMIN_UID = "II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2"; // <<< Your specific Firebase User ID
 // ---------------------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,14 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check authentication state
     fbAuth.onAuthStateChanged(user => {
         if (user) {
-            // User is logged in, check if they are the admin
-            if (user.email === ADMIN_EMAIL) {
-                console.log('Admin user authenticated:', user.email);
-                // User is admin, fetch results
+            // User is logged in, check if their UID matches the admin UID
+            if (user.uid === ADMIN_UID) {
+                console.log('Admin user authenticated by UID:', user.uid);
                 fetchAndDisplayResults();
             } else {
                 // User is logged in but not admin
-                console.warn('Unauthorized user attempt:', user.email);
+                console.warn('Unauthorized user attempt UID:', user.uid);
                 showUnauthorized();
             }
         } else {
