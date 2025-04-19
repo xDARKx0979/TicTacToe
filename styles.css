@@ -116,9 +116,11 @@ h2 {
 }
 
 .game-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    /* display: flex; */ /* Changed from flex to grid */
+    /* flex-wrap: wrap; */
+    /* justify-content: center; */
+    display: grid; /* Use Grid layout */
+    grid-template-columns: repeat(3, 1fr); /* Create 3 equal-width columns */
     gap: 20px;
     margin-top: 30px;
 }
@@ -129,11 +131,13 @@ h2 {
     border: 2px solid var(--border-color);
     border-radius: 8px;
     padding: 20px;
-    width: 200px;
+    /* width: 200px; */ /* Removed fixed width */
     text-align: center;
     text-decoration: none;
     color: var(--text-color);
     transition: all 0.3s ease;
+    /* Ensure buttons stretch if needed within grid cell (optional but good practice) */
+    width: 100%; 
 }
 
 .game-button:hover {
