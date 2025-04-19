@@ -16,6 +16,25 @@ function clearError(elementId) {
     }
 }
 
+// --- Path and authentication helpers ---
+function getCleanPath() {
+    let path = window.location.pathname;
+    if (path !== '/' && path.endsWith('/')) {
+        path = path.slice(0, -1);
+    }
+    return path;
+}
+
+function isAuthPage(path) {
+    const loginPath = '/login';
+    const signupPath = '/signup';
+    const resetPath = '/reset-password';
+    return path === loginPath || path === loginPath + '.html' || 
+           path === signupPath || path === signupPath + '.html' || 
+           path === resetPath || path === resetPath + '.html' || 
+           path === '/';
+}
+
 // --- Attempt to clear old insecure data ---
 try {
     localStorage.removeItem('users');
@@ -24,31 +43,45 @@ try {
     console.warn('Could not remove old data from localStorage:', e);
 }
 
+// --- IMMEDIATE AUTH CHECK ON PAGE LOAD ---
+// This runs immediately when the script is loaded, before any event handlers
+(function immediateAuthCheck() {
+    const currentPath = getCleanPath();
+    
+    // Skip immediate check on auth pages
+    if (isAuthPage(currentPath)) {
+        console.log('>>> On auth page, skipping immediate auth check');
+        return;
+    }
+    
+    console.log('>>> Running immediate auth check for:', currentPath);
+    
+    // Clear any lingering auth tokens
+    const authTokenKey = 'strict_auth_token';
+    sessionStorage.removeItem(authTokenKey);
+    
+    // Force redirect to login if not on an auth page
+    console.log('>>> Forcing redirect to login from:', currentPath);
+    sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
+    window.location.href = '/login.html';
+})();
+
 // --- Firebase Authentication Logic ---
 
 // Get Firebase Auth instance (initialized in firebase-init.js)
 const fbAuth = firebase.auth();
 
-// Set persistence to SESSION to prevent automatic login after browser restart
-// This makes users login again after closing the browser
+// Force SESSION persistence only - no persistent logins
 fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
   .then(() => {
-    console.log('Firebase auth persistence set to SESSION');
+    console.log('Firebase auth persistence strictly set to SESSION');
   })
   .catch((error) => {
     console.error('Error setting auth persistence:', error);
   });
 
-// Add a page-specific auth token in sessionStorage to enforce per-tab authentication
-// This ensures each new tab requires its own authentication
-const authTokenKey = 'page_auth_token';
-const pageAuthToken = sessionStorage.getItem(authTokenKey) || '';
-
-// Clear the token if opening a new page or tab - force reauth check
-if (!document.referrer || !document.referrer.includes(window.location.host)) {
-    console.log('New page/tab detected, clearing tab-specific auth token');
-    sessionStorage.removeItem(authTokenKey);
-}
+// Strict authentication token
+const authTokenKey = 'strict_auth_token';
 
 // Signup Function
 function handleSignup(event) {
@@ -137,7 +170,7 @@ function handleLogin(event) {
             // onAuthStateChanged will handle checking survey and redirecting.
             console.log("User login API call successful, waiting for auth state change:", userCredential.user);
             
-            // Set the page token for this tab upon successful login
+            // Set the strict auth token for this session
             sessionStorage.setItem(authTokenKey, Date.now().toString());
         })
         .catch((error) => {
@@ -156,7 +189,7 @@ function handleLogin(event) {
 function handleLogout() {
     console.log('Attempting logout...');
     
-    // Clear the page token before signing out
+    // Clear the strict auth token before signing out
     sessionStorage.removeItem(authTokenKey);
     
     fbAuth.signOut().then(() => {
@@ -246,10 +279,7 @@ function handlePasswordReset(event) {
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
-    let currentPath = window.location.pathname;
-    if (currentPath !== '/' && currentPath.endsWith('/')) {
-        currentPath = currentPath.slice(0, -1);
-    }
+    const currentPath = getCleanPath();
     console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
     // Clear any previous verification messages
@@ -258,33 +288,18 @@ fbAuth.onAuthStateChanged((user) => {
     const resendButton = document.getElementById('resend-verification-button');
     if (resendButton) resendButton.style.display = 'none';
 
-    const loginPath = '/login';
-    const signupPath = '/signup';
-    const surveyPath = '/survey'; 
-    const resetPath = '/reset-password';
-    // Explicitly define all auth-related pages
-    const isLoginPage = currentPath === loginPath || currentPath === loginPath + '.html' || currentPath === '/';
-    const isSignupPage = currentPath === signupPath || currentPath === signupPath + '.html';
-    const isResetPage = currentPath === resetPath || currentPath === resetPath + '.html';
-    const isSurveyPage = currentPath === surveyPath || currentPath === surveyPath + '.html'; 
-    const isAuthPage = isLoginPage || isSignupPage || isResetPage; // Auth pages don't require login
-    // Define pages that an unverified user IS allowed to be on
-    const allowedUnverifiedPages = [loginPath, signupPath, resetPath, '/']; 
-    const isAllowedUnverifiedPage = allowedUnverifiedPages.some(p => currentPath === p || currentPath === p + '.html');
+    // Check if we're on an auth page that doesn't require login
+    const isAuthPagePath = isAuthPage(currentPath);
+    const isSurveyPage = currentPath === '/survey' || currentPath === '/survey.html'; 
+    
+    // Check for strict auth token to enforce session-specific authentication
+    const hasAuthToken = !!sessionStorage.getItem(authTokenKey);
+    console.log(`>>> Has strict auth token: ${hasAuthToken}`);
 
-    console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isSurveyPage=${isSurveyPage}, isAuthPage=${isAuthPage}, isAllowedUnverifiedPage=${isAllowedUnverifiedPage}`);
-
-    // Check for page token to enforce per-tab authentication
-    const hasPageToken = !!sessionStorage.getItem(authTokenKey);
-    console.log(`>>> Has page auth token: ${hasPageToken}`);
-
-    if (user) {
-        // User is signed IN (or just signed up)
-        console.log('>>> Auth state: IN');
+    if (user && hasAuthToken) {
+        // User is authenticated AND has a valid token for this session
+        console.log('>>> Auth state: STRICT_AUTHENTICATED');
         document.body.classList.add('logged-in');
-
-        // Set the page token for this tab
-        sessionStorage.setItem(authTokenKey, Date.now().toString());
 
         // --- Check Email Verification FIRST ---
         if (!user.emailVerified) {
@@ -292,16 +307,14 @@ fbAuth.onAuthStateChanged((user) => {
             // Display persistent message
             displayError('auth-message', 'Email address not verified. Please click the link in the verification email sent to you. If you just verified, try logging in again.'); 
             // Show the resend button IF on the login page
-            if (isLoginPage && resendButton) {
-                resendButton.style.display = 'block'; // Or 'inline-block' depending on styling
+            if (currentPath === '/login' || currentPath === '/login.html' || currentPath === '/' && resendButton) {
+                resendButton.style.display = 'block'; 
             }
             
-            // Redirect if necessary
-            if (!isAllowedUnverifiedPage) {
+            // Redirect if necessary - only allow unverified users on specific pages
+            if (!isAuthPagePath) {
                  console.log(`>>> Redirecting unverified user from ${currentPath} to /login.html`);
                  window.location.href = '/login.html'; 
-            } else {
-                 console.log(`>>> Staying on allowed page for unverified user: ${currentPath}`);
             }
             return; 
         }
@@ -323,7 +336,7 @@ fbAuth.onAuthStateChanged((user) => {
                     // Redirect away from survey page.
                     console.log(`>>> Survey completed, redirecting verified user from survey page to /index.html`);
                     window.location.href = '/index.html'; 
-                } else if (isAuthPage) {
+                } else if (isAuthPagePath) {
                     // Redirect away from login/signup page.
                     const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
                     sessionStorage.removeItem('redirectAfterLogin');
@@ -331,14 +344,14 @@ fbAuth.onAuthStateChanged((user) => {
                     window.location.href = redirectUrl;
                 } else {
                     // Survey completed, on a protected page. Do nothing.
-                    console.log(`>>> Survey completed, Staying on protected page: ${currentPath}`);
+                    console.log(`>>> Survey completed, staying on protected page: ${currentPath}`);
                 }
             } else {
                 // Survey NOT completed (or doc doesn't exist).
                 if (!isSurveyPage) {
                     // Redirect TO survey page.
                     console.log(`>>> Survey NOT completed, redirecting verified user from ${currentPath} to /survey.html`);
-                    sessionStorage.setItem('redirectAfterSurvey', isAuthPage ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
+                    sessionStorage.setItem('redirectAfterSurvey', isAuthPagePath ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
                     sessionStorage.removeItem('redirectAfterLogin'); 
                     window.location.href = '/survey.html';
                 } else {
@@ -352,32 +365,32 @@ fbAuth.onAuthStateChanged((user) => {
             // assume they haven't completed it.
             if (!isSurveyPage) {
                 console.warn("Could not check survey status, redirecting verified user to survey page.");
-                 sessionStorage.setItem('redirectAfterSurvey', isAuthPage ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
+                 sessionStorage.setItem('redirectAfterSurvey', isAuthPagePath ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
                  sessionStorage.removeItem('redirectAfterLogin'); 
                 window.location.href = '/survey.html';
             } else {
                  console.warn("Could not check survey status, staying on survey page.");
             }
         });
-
     } else {
-        // User is signed OUT
-        console.log('>>> Auth state: OUT');
+        // User is NOT properly authenticated
+        console.log('>>> Auth state: NOT_AUTHENTICATED');
         document.body.classList.remove('logged-in');
         
-        // Clear the page token when signed out
+        // Clear the auth token
         sessionStorage.removeItem(authTokenKey);
 
-        // If NOT on an auth page (or survey page - although they shouldn't reach it logged out), redirect TO login
-         if (!isAuthPage && !isSurveyPage) { // Keep survey check here just in case
-            console.log(`>>> Redirecting OUT user from protected page ${currentPath} to /login.html`);
+        // If NOT on an auth page, redirect TO login
+        if (!isAuthPagePath && !isSurveyPage) {
+            console.log(`>>> Redirecting unauthenticated user from ${currentPath} to /login.html`);
             sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
             window.location.href = '/login.html';
         } else {
-             // User is OUT and on an auth/survey page - do nothing.
+            // User is NOT authenticated but on an auth/survey page - do nothing.
             console.log(`>>> Staying on auth/survey page: ${currentPath}`);
         }
-        // Hide resend button if logged out
+        
+        // Hide resend button
         if (resendButton) resendButton.style.display = 'none'; 
     }
 });
