@@ -246,47 +246,52 @@ function handleLogin(event) {
 
 // Logout Functionality
 function handleLogout() {
-    console.log('Attempting logout...');
+    console.log('🔐 LOGOUT: Attempting logout...');
     
-    // Clear ALL storage that could contain auth data
-    sessionStorage.clear(); // Clear all sessionStorage
-    
-    // Find and remove any Firebase localStorage items
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('firebase:') || key.includes('firebaseLocalStorage'))) {
-            localStorage.removeItem(key);
+    try {
+        // Clear ALL storage that could contain auth data
+        console.log('🔐 LOGOUT: Clearing sessionStorage');
+        sessionStorage.clear();
+        
+        console.log('🔐 LOGOUT: Clearing localStorage Firebase items');
+        // Clear Firebase items from localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.includes('firebase')) {
+                console.log('🔐 LOGOUT: Removing localStorage item:', key);
+                localStorage.removeItem(key);
+                // Adjust index since we're removing items
+                i--;
+            }
         }
+        
+        // Most reliable method: Use Firebase signOut
+        console.log('🔐 LOGOUT: Calling Firebase signOut');
+        firebase.auth().signOut().then(() => {
+            console.log('🔐 LOGOUT: Firebase signOut successful');
+            console.log('🔐 LOGOUT: Redirecting to login page');
+            
+            // Force redirect to login page
+            window.location.href = '/login.html';
+            
+            // Extra measure if redirect doesn't work immediately
+            setTimeout(() => {
+                console.log('🔐 LOGOUT: Redirect timeout triggered');
+                window.location.replace('/login.html');
+            }, 1000);
+        }).catch(error => {
+            console.error('🔐 LOGOUT ERROR:', error);
+            
+            // Try force logout anyway
+            window.location.href = '/login.html';
+        });
+    } catch (error) {
+        console.error('🔐 LOGOUT ERROR:', error);
+        
+        // Last resort
+        alert('Logout error. Please close browser and re-open.');
+        window.location.href = '/login.html';
     }
-    
-    // Use both signOut methods for maximum reliability
-    if (firebase && firebase.auth) {
-        firebase.auth().signOut()
-            .then(() => {
-                console.log("Firebase signOut successful");
-                forceRedirectToLogin();
-            })
-            .catch((error) => {
-                console.error("Firebase signOut error:", error);
-                // Redirect anyway
-                forceRedirectToLogin();
-            });
-    } else {
-        console.error("Firebase auth not available, forcing redirect anyway");
-        forceRedirectToLogin();
-    }
-}
-
-// Helper function to ensure redirect happens
-function forceRedirectToLogin() {
-    console.log("Forcing logout redirect");
-    // Use replace instead of href to prevent history navigation issues
-    window.location.replace('/login.html');
-    
-    // Extra safety measure - if redirect doesn't happen within 500ms, reload page
-    setTimeout(() => {
-        window.location.reload();
-    }, 500);
 }
 
 // --- Add Resend Verification Email Function ---
@@ -500,6 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-button');
     const resendBtn = document.getElementById('resend-verification-button');
     
+    console.log("DOM loaded, setting up event listeners");
+    console.log("Logout button found:", !!logoutButton);
+    
     // --- Password Reset Elements ---
     const resetForm = document.getElementById('reset-form');
     const forgotPasswordLink = document.getElementById('forgot-password-link');
@@ -516,8 +524,24 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', handleLogin);
     }
 
+    // FIX: Add direct logout handler for all elements with logout class OR id
+    document.querySelectorAll('.logout-button, #logout-button, [data-action="logout"]').forEach(button => {
+        console.log("Adding click listener to logout button:", button);
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Logout button clicked!");
+            handleLogout();
+        });
+    });
+    
+    // Also attach the original way as backup
     if (logoutButton) {
-        logoutButton.addEventListener('click', handleLogout);
+        console.log("Adding click listener to main logout button");
+        logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Main logout button clicked!");
+            handleLogout();
+        });
     }
 
     if (resendBtn) {
@@ -550,4 +574,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // -----------------------------
-}); 
+});
+
+// Global logout function that can be called from HTML onclick
+function logoutUser() {
+    console.log('Global logout function called');
+    handleLogout();
+} 
