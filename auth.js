@@ -133,44 +133,43 @@ function handleLogout() {
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
-    console.log(`>>> onAuthStateChanged: Start. User: ${user ? user.email : 'null'}. Path: ${window.location.pathname}`);
     const currentPath = window.location.pathname;
-    const isLoginPage = currentPath.endsWith('/login.html') || currentPath === '/';
-    const isSignupPage = currentPath.endsWith('/signup.html');
+    console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
-    // Add a small delay to potentially avoid race conditions during redirects
-    setTimeout(() => {
-        if (user) {
-            // User is signed in.
-            console.log('>>> onAuthStateChanged: User is IN.');
-            document.body.classList.add('logged-in');
+    // Define auth pages explicitly
+    const authPages = ['/login.html', '/signup.html', '/']; // Include root '/' if it defaults to login
+    const isAuthPage = authPages.includes(currentPath);
 
-            if (isLoginPage || isSignupPage) {
-                const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-                sessionStorage.removeItem('redirectAfterLogin');
-                console.log(`>>> onAuthStateChanged: User IN, redirecting from Auth page (${currentPath}) to ${redirectUrl}`);
-                window.location.href = redirectUrl;
-            } else {
-                 console.log(`>>> onAuthStateChanged: User IN, on protected page (${currentPath}), staying.`);
-                 // User is logged in and on a protected page - do nothing.
-            }
+    if (user) {
+        // User is signed IN
+        console.log('>>> Auth state: IN');
+        document.body.classList.add('logged-in');
+
+        // If on an auth page, redirect away (to index or intended destination)
+        if (isAuthPage) {
+            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+            sessionStorage.removeItem('redirectAfterLogin');
+            console.log(`>>> Redirecting IN user from ${currentPath} to ${redirectUrl}`);
+            window.location.href = redirectUrl;
         } else {
-            // User is signed out.
-            console.log('>>> onAuthStateChanged: User is OUT.');
-            document.body.classList.remove('logged-in');
-
-            if (!isLoginPage && !isSignupPage) {
-                 console.log(`>>> onAuthStateChanged: User OUT, redirecting from protected page (${currentPath}) to login.`);
-                sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
-                window.location.href = '/login.html';
-            } else {
-                console.log(`>>> onAuthStateChanged: User OUT, on login/signup page (${currentPath}), staying.`);
-                // User is logged out and on login/signup page - do nothing.
-            }
+            console.log(`>>> Staying on protected page: ${currentPath}`);
+            // User is IN and on a protected page - do nothing.
         }
-        console.log('>>> onAuthStateChanged: Finish processing.');
-    }, 50); // 50ms delay - adjust if needed, but keep it short
+    } else {
+        // User is signed OUT
+        console.log('>>> Auth state: OUT');
+        document.body.classList.remove('logged-in');
 
+        // If NOT on an auth page, redirect TO login
+        if (!isAuthPage) {
+            console.log(`>>> Redirecting OUT user from protected page ${currentPath} to /login.html`);
+            sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
+            window.location.href = '/login.html';
+        } else {
+            console.log(`>>> Staying on auth page: ${currentPath}`);
+            // User is OUT and on an auth page (login/signup) - do nothing.
+        }
+    }
 });
 
 // --- Event Listeners (Run after DOM is loaded) ---
