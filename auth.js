@@ -147,48 +147,57 @@ fbAuth.onAuthStateChanged((user) => {
         console.log('>>> Auth state: IN');
         document.body.classList.add('logged-in');
 
-        // --- Get Firestore instance HERE ---
-        const db = firebase.firestore(); 
-        // ----------------------------------
+        const db = firebase.firestore();
 
-        // Only check survey/redirect if NOT already on the survey page when survey needed
-        if (!isSurveyPage) { 
-            const userDocRef = db.collection('users').doc(user.uid);
-            userDocRef.get().then((doc) => {
-                if (doc.exists && doc.data().surveyCompleted === true) {
-                    // Survey completed. If on auth page, redirect away.
-                    if (isAuthPage) {
-                         const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-                         sessionStorage.removeItem('redirectAfterLogin');
-                         console.log(`>>> Survey completed, redirecting IN user from ${currentPath} to ${redirectUrl}`);
-                         window.location.href = redirectUrl;
-                    } else {
-                         console.log(`>>> Survey completed, Staying on protected page: ${currentPath}`);
-                         // Survey completed, already on protected page, do nothing.
-                    }
+        const userDocRef = db.collection('users').doc(user.uid);
+        userDocRef.get().then((doc) => {
+            const surveyDone = doc.exists && doc.data().surveyCompleted === true;
+            console.log(`>>> Firestore check: surveyDone=${surveyDone}`);
+
+            if (surveyDone) {
+                // Survey is completed.
+                if (isSurveyPage) {
+                    // If they are on the survey page, redirect away.
+                    console.log(`>>> Survey completed, redirecting IN user from survey page to /index.html`);
+                    window.location.href = '/index.html'; 
+                } else if (isAuthPage) {
+                    // If they are on login/signup, redirect to intended page or index.
+                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    console.log(`>>> Survey completed, redirecting IN user from ${currentPath} to ${redirectUrl}`);
+                    window.location.href = redirectUrl;
                 } else {
-                    // Survey NOT completed, redirect TO survey page
+                    // Survey completed, already on a protected page (not survey/auth). Do nothing.
+                    console.log(`>>> Survey completed, Staying on protected page: ${currentPath}`);
+                }
+            } else {
+                // Survey NOT completed (or doc doesn't exist).
+                if (!isSurveyPage) {
+                    // If NOT on survey page, redirect TO survey page.
                     console.log(`>>> Survey NOT completed, redirecting IN user from ${currentPath} to /survey.html`);
-                    sessionStorage.setItem('redirectAfterSurvey', sessionStorage.getItem('redirectAfterLogin') || currentPath); // Store where they were going or current page
+                    // Store where they were trying to go *before* being sent to survey
+                    sessionStorage.setItem('redirectAfterSurvey', isAuthPage ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
                     sessionStorage.removeItem('redirectAfterLogin'); 
                     window.location.href = '/survey.html';
+                } else {
+                     // Survey NOT completed, and already ON survey page. Do nothing.
+                    console.log(`>>> Survey NOT completed, staying on survey page.`);
                 }
-            }).catch((error) => {
-                console.error("Error checking survey status:", error);
-                // --- MODIFIED ERROR HANDLING ---
-                // If we fail to check the survey status for a logged-in user,
-                // assume they haven't completed it and send them to the survey page
-                // to be safe. Don't redirect if already on survey page (shouldn't happen here).
+            }
+        }).catch((error) => {
+            console.error("Error checking survey status:", error);
+            // If we fail to check the survey status for a logged-in user,
+            // it's safest to assume they haven't completed it.
+            if (!isSurveyPage) {
+                // Redirect to survey only if not already there.
                 console.warn("Could not check survey status due to error, redirecting to survey page.");
-                sessionStorage.setItem('redirectAfterSurvey', sessionStorage.getItem('redirectAfterLogin') || currentPath); 
-                sessionStorage.removeItem('redirectAfterLogin'); 
+                 sessionStorage.setItem('redirectAfterSurvey', isAuthPage ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
+                 sessionStorage.removeItem('redirectAfterLogin'); 
                 window.location.href = '/survey.html';
-                // --- END MODIFIED ERROR HANDLING ---
-            });
-        } else {
-            // User is on the survey page, let survey.js handle logic
-             console.log(`>>> User IN, already on survey page, staying.`);
-        }
+            } else {
+                 console.warn("Could not check survey status due to error, staying on survey page.");
+            }
+        });
     } else {
         // User is signed OUT
         console.log('>>> Auth state: OUT');
