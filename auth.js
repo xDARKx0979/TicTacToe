@@ -141,6 +141,34 @@ function handleLogout() {
     });
 }
 
+// --- Add Resend Verification Email Function ---
+function handleResendVerificationEmail() {
+    const user = fbAuth.currentUser;
+    if (user && !user.emailVerified) {
+        user.sendEmailVerification()
+            .then(() => {
+                console.log("Verification email resent successfully.");
+                // Display a confirmation message (reuse auth-message or use a new one)
+                displayError('auth-message', 'Verification email sent again. Please check your inbox (and spam folder).'); 
+                // Optionally disable the button for a while after clicking
+                const resendButton = document.getElementById('resend-verification-button');
+                if (resendButton) {
+                    resendButton.disabled = true;
+                    setTimeout(() => { resendButton.disabled = false; }, 60000); // Re-enable after 60 seconds
+                }
+            })
+            .catch((error) => {
+                console.error("Error resending verification email:", error);
+                 displayError('auth-message', 'Failed to resend verification email. Please try again later or contact support.');
+            });
+    } else {
+        console.log("Resend function called but user is null or already verified.");
+        // Hide the button if it was somehow visible
+        const resendButton = document.getElementById('resend-verification-button');
+        if (resendButton) resendButton.style.display = 'none';
+    }
+}
+
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
@@ -152,6 +180,9 @@ fbAuth.onAuthStateChanged((user) => {
 
     // Clear any previous verification messages
     clearError('auth-message'); 
+    // Hide resend button initially
+    const resendButton = document.getElementById('resend-verification-button');
+    if (resendButton) resendButton.style.display = 'none';
 
     const loginPath = '/login';
     const signupPath = '/signup';
@@ -176,23 +207,27 @@ fbAuth.onAuthStateChanged((user) => {
         // --- Check Email Verification FIRST ---
         if (!user.emailVerified) {
             console.log('>>> User email NOT verified.');
-            // Display persistent message (needs a dedicated element in HTML, e.g., <div id="auth-message"></div> near login/signup forms or in header)
+            // Display persistent message
             displayError('auth-message', 'Please check your email and click the verification link to complete signup.'); 
+            // Show the resend button IF on the login page
+            if (isLoginPage && resendButton) {
+                resendButton.style.display = 'block'; // Or 'inline-block' depending on styling
+            }
             
-            // If they are on a page they shouldn't be on without verification, redirect them.
-            // Allow them on login/signup (and potentially a dedicated verify page)
+            // Redirect if necessary
             if (!isAllowedUnverifiedPage) {
                  console.log(`>>> Redirecting unverified user from ${currentPath} to /login.html`);
-                 window.location.href = '/login.html'; // Send them back to login
+                 window.location.href = '/login.html'; 
             } else {
                  console.log(`>>> Staying on allowed page for unverified user: ${currentPath}`);
             }
-            // IMPORTANT: Stop further processing (like survey checks) if email is not verified
             return; 
         }
 
         // --- Email is VERIFIED - Proceed with survey check ---
         console.log('>>> User email IS verified.');
+        // Hide resend button just in case it was visible
+        if (resendButton) resendButton.style.display = 'none'; 
         const db = firebase.firestore();
         const userDocRef = db.collection('users').doc(user.uid);
 
@@ -257,6 +292,8 @@ fbAuth.onAuthStateChanged((user) => {
              // User is OUT and on an auth/survey page - do nothing.
             console.log(`>>> Staying on auth/survey page: ${currentPath}`);
         }
+        // Hide resend button if logged out
+        if (resendButton) resendButton.style.display = 'none'; 
     }
 });
 
@@ -277,5 +314,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Logout button might not be present on login/signup pages
     if (logoutButton) {
         logoutButton.addEventListener('click', handleLogout);
+    }
+
+    // Add listener for the new resend button
+    const resendBtn = document.getElementById('resend-verification-button');
+    if (resendBtn) {
+        resendBtn.addEventListener('click', handleResendVerificationEmail);
     }
 }); 
