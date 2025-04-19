@@ -48,23 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Use db instance directly
         db.runTransaction((transaction) => {
-            return transaction.get(resultsDocRef).then((resultsDoc) => {
-                // Update user document
-                transaction.set(userDocRef, {
-                    surveyCompleted: true,
-                    surveyChoice: choice,
-                    email: user.email // Optionally store email
-                }, { merge: true }); // Create or merge user document
+            // Update user document
+            transaction.set(userDocRef, {
+                surveyCompleted: true,
+                surveyChoice: choice,
+                email: user.email // Optionally store email
+            }, { merge: true }); // Create or merge user document
 
-                // Update aggregate results document
-                if (!resultsDoc.exists) {
-                    // If aggregate doc doesn't exist, create it with initial count
-                    transaction.set(resultsDocRef, updateData);
-                } else {
-                    // If aggregate doc exists, update it with increment
-                    transaction.update(resultsDocRef, updateData);
-                }
-            });
+            // Update aggregate results document - Use set with merge instead of checking existence
+            transaction.set(resultsDocRef, updateData, { merge: true });
+
+            // The transaction function must return a Promise that resolves when the transaction is complete.
+            // Since the set operations don't return a useful promise directly within the transaction callback,
+            // we return a resolved promise to signal success.
+            return Promise.resolve(); 
+
         }).then(() => {
             console.log('>>> Survey TX success!');
             // Redirect user to their original destination or index page
