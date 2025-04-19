@@ -58,10 +58,28 @@ function handleSignup(event) {
     console.log('Attempting signup for:', email);
     fbAuth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Signed up and signed in 
-            // onAuthStateChanged will handle the redirect
-            console.log("User signed up successfully, waiting for auth state change:", userCredential.user);
-            // No direct redirect here - let onAuthStateChanged handle it
+            // Signed up 
+            console.log("User signed up successfully:", userCredential.user);
+            
+            // Send verification email
+            userCredential.user.sendEmailVerification()
+                .then(() => {
+                    console.log("Verification email sent.");
+                    // Optionally, display a message on the signup form confirmation area
+                    // e.g., clearError('signup-error'); 
+                    // displayError('signup-success', 'Signup successful! Please check your email to verify your account before logging in.'); 
+                    // Maybe automatically redirect to login page after a delay?
+                    // Or just let onAuthStateChanged handle showing the message later.
+                    // For now, just log it. We'll add UI prompts via onAuthStateChanged.
+                })
+                .catch((error) => {
+                    console.error("Error sending verification email:", error);
+                    // Display a generic signup error, but log the specific issue
+                     displayError('signup-error', 'Signup successful, but failed to send verification email. Please contact support or try logging in later.');
+                });
+            
+            // Let onAuthStateChanged handle redirects/state based on verification later.
+            // No direct redirect here.
         })
         .catch((error) => {
             console.error("Signup Error:", error.code, error.message);
@@ -132,24 +150,52 @@ fbAuth.onAuthStateChanged((user) => {
     }
     console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
+    // Clear any previous verification messages
+    clearError('auth-message'); 
+
     const loginPath = '/login';
     const signupPath = '/signup';
-    const surveyPath = '/survey'; // Define survey path
+    const surveyPath = '/survey'; 
+    // Add a dedicated page path if we create one later: const verifyEmailPath = '/verify-email';
     const isLoginPage = currentPath === loginPath || currentPath === loginPath + '.html' || currentPath === '/';
     const isSignupPage = currentPath === signupPath || currentPath === signupPath + '.html';
-    const isSurveyPage = currentPath === surveyPath || currentPath === surveyPath + '.html'; // Check if on survey page
-    const isAuthPage = isLoginPage || isSignupPage;
+    const isSurveyPage = currentPath === surveyPath || currentPath === surveyPath + '.html'; 
+    const isAuthPage = isLoginPage || isSignupPage; // Add verifyEmailPath here if created
+    // Define pages that an unverified user IS allowed to be on
+    const allowedUnverifiedPages = [loginPath, signupPath, '/', /* verifyEmailPath */]; 
+    const isAllowedUnverifiedPage = allowedUnverifiedPages.some(p => currentPath === p || currentPath === p + '.html');
 
-    console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isSurveyPage=${isSurveyPage}, isAuthPage=${isAuthPage}`);
+
+    console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isSurveyPage=${isSurveyPage}, isAuthPage=${isAuthPage}, isAllowedUnverifiedPage=${isAllowedUnverifiedPage}`);
 
     if (user) {
-        // User is signed IN
+        // User is signed IN (or just signed up)
         console.log('>>> Auth state: IN');
         document.body.classList.add('logged-in');
 
-        const db = firebase.firestore();
+        // --- Check Email Verification FIRST ---
+        if (!user.emailVerified) {
+            console.log('>>> User email NOT verified.');
+            // Display persistent message (needs a dedicated element in HTML, e.g., <div id="auth-message"></div> near login/signup forms or in header)
+            displayError('auth-message', 'Please check your email and click the verification link to complete signup.'); 
+            
+            // If they are on a page they shouldn't be on without verification, redirect them.
+            // Allow them on login/signup (and potentially a dedicated verify page)
+            if (!isAllowedUnverifiedPage) {
+                 console.log(`>>> Redirecting unverified user from ${currentPath} to /login.html`);
+                 window.location.href = '/login.html'; // Send them back to login
+            } else {
+                 console.log(`>>> Staying on allowed page for unverified user: ${currentPath}`);
+            }
+            // IMPORTANT: Stop further processing (like survey checks) if email is not verified
+            return; 
+        }
 
+        // --- Email is VERIFIED - Proceed with survey check ---
+        console.log('>>> User email IS verified.');
+        const db = firebase.firestore();
         const userDocRef = db.collection('users').doc(user.uid);
+
         userDocRef.get().then((doc) => {
             const surveyDone = doc.exists && doc.data().surveyCompleted === true;
             console.log(`>>> Firestore check: surveyDone=${surveyDone}`);
@@ -157,59 +203,58 @@ fbAuth.onAuthStateChanged((user) => {
             if (surveyDone) {
                 // Survey is completed.
                 if (isSurveyPage) {
-                    // If they are on the survey page, redirect away.
-                    console.log(`>>> Survey completed, redirecting IN user from survey page to /index.html`);
+                    // Redirect away from survey page.
+                    console.log(`>>> Survey completed, redirecting verified user from survey page to /index.html`);
                     window.location.href = '/index.html'; 
                 } else if (isAuthPage) {
-                    // If they are on login/signup, redirect to intended page or index.
+                    // Redirect away from login/signup page.
                     const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
                     sessionStorage.removeItem('redirectAfterLogin');
-                    console.log(`>>> Survey completed, redirecting IN user from ${currentPath} to ${redirectUrl}`);
+                    console.log(`>>> Survey completed, redirecting verified user from ${currentPath} to ${redirectUrl}`);
                     window.location.href = redirectUrl;
                 } else {
-                    // Survey completed, already on a protected page (not survey/auth). Do nothing.
+                    // Survey completed, on a protected page. Do nothing.
                     console.log(`>>> Survey completed, Staying on protected page: ${currentPath}`);
                 }
             } else {
                 // Survey NOT completed (or doc doesn't exist).
                 if (!isSurveyPage) {
-                    // If NOT on survey page, redirect TO survey page.
-                    console.log(`>>> Survey NOT completed, redirecting IN user from ${currentPath} to /survey.html`);
-                    // Store where they were trying to go *before* being sent to survey
+                    // Redirect TO survey page.
+                    console.log(`>>> Survey NOT completed, redirecting verified user from ${currentPath} to /survey.html`);
                     sessionStorage.setItem('redirectAfterSurvey', isAuthPage ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
                     sessionStorage.removeItem('redirectAfterLogin'); 
                     window.location.href = '/survey.html';
                 } else {
-                     // Survey NOT completed, and already ON survey page. Do nothing.
+                     // Already ON survey page. Do nothing.
                     console.log(`>>> Survey NOT completed, staying on survey page.`);
                 }
             }
         }).catch((error) => {
             console.error("Error checking survey status:", error);
-            // If we fail to check the survey status for a logged-in user,
-            // it's safest to assume they haven't completed it.
+            // If we fail to check the survey status for a verified user,
+            // assume they haven't completed it.
             if (!isSurveyPage) {
-                // Redirect to survey only if not already there.
-                console.warn("Could not check survey status due to error, redirecting to survey page.");
+                console.warn("Could not check survey status, redirecting verified user to survey page.");
                  sessionStorage.setItem('redirectAfterSurvey', isAuthPage ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
                  sessionStorage.removeItem('redirectAfterLogin'); 
                 window.location.href = '/survey.html';
             } else {
-                 console.warn("Could not check survey status due to error, staying on survey page.");
+                 console.warn("Could not check survey status, staying on survey page.");
             }
         });
+
     } else {
         // User is signed OUT
         console.log('>>> Auth state: OUT');
         document.body.classList.remove('logged-in');
 
-        // If NOT on an auth page or survey page, redirect TO login
-        if (!isAuthPage && !isSurveyPage) {
+        // If NOT on an auth page (or survey page - although they shouldn't reach it logged out), redirect TO login
+         if (!isAuthPage && !isSurveyPage) { // Keep survey check here just in case
             console.log(`>>> Redirecting OUT user from protected page ${currentPath} to /login.html`);
             sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
             window.location.href = '/login.html';
         } else {
-             // User is OUT and on an auth page or survey page - do nothing.
+             // User is OUT and on an auth/survey page - do nothing.
             console.log(`>>> Staying on auth/survey page: ${currentPath}`);
         }
     }
