@@ -134,20 +134,25 @@ function handleLogout() {
 console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
     let currentPath = window.location.pathname;
-    // Normalize path: remove trailing slash if present and not the root
     if (currentPath !== '/' && currentPath.endsWith('/')) {
         currentPath = currentPath.slice(0, -1);
     }
-    console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Normalized Path: ${currentPath}`);
+    console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
-    // Define auth pages explicitly
-    const authPages = ['/login.html', '/signup.html', '/'];
-    const isAuthPage = authPages.includes(currentPath);
+    // Define specific auth page paths
+    const loginPath = '/login.html';
+    const signupPath = '/signup.html';
+    const isLoginPage = currentPath === loginPath || currentPath === '/'; // Treat root as login
+    const isSignupPage = currentPath === signupPath;
+    const isAuthPage = isLoginPage || isSignupPage; // More explicit check
+
+    console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isAuthPage=${isAuthPage}`);
 
     if (user) {
         // User is signed IN
         console.log('>>> Auth state: IN');
         document.body.classList.add('logged-in');
+
         if (isAuthPage) {
             const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
             sessionStorage.removeItem('redirectAfterLogin');
@@ -161,14 +166,7 @@ fbAuth.onAuthStateChanged((user) => {
         console.log('>>> Auth state: OUT');
         document.body.classList.remove('logged-in');
 
-        // --- Start Debug Logging --- 
-        console.log(`>>> Debug OUT state: currentPath = "${currentPath}"`);
-        console.log(`>>> Debug OUT state: authPages = [${authPages.join(', ')}]`);
-        console.log(`>>> Debug OUT state: isAuthPage = ${isAuthPage}`);
-        // --- End Debug Logging --- 
-
-        // If NOT on an auth page, redirect TO login
-        if (!isAuthPage) { 
+        if (!isAuthPage) {
             console.log(`>>> Redirecting OUT user from protected page ${currentPath} to /login.html`);
             sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
             window.location.href = '/login.html';
