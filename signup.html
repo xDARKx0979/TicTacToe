@@ -66,15 +66,38 @@
             font-size: 0.9em;
             display: none; /* Hidden by default */
         }
+        .notice-box {
+            background-color: var(--notice-bg, #fff3cd); /* Light yellow background */
+            color: var(--notice-text, #664d03); /* Dark yellow/brown text */
+            border: 1px solid var(--notice-border, #ffecb5);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .dark-mode .notice-box {
+            background-color: var(--dark-notice-bg, #664d03);
+            color: var(--dark-notice-text, #ffecb5);
+            border-color: var(--dark-notice-border, #8d6e04);
+        }
     </style>
 </head>
 <body>
     <div class="auth-container">
-        <h1>Create Account</h1>
+        <h1>Sign Up</h1>
+        
+        <!-- Signup System Update Notice -->
+        <div class="notice-box">
+            <strong>Notice:</strong> We have updated our sign-in system for enhanced security. If you created an account before April 19th, you will need to sign up again. We apologize for any inconvenience this may cause.
+        </div>
+
         <form id="signup-form" class="auth-form">
             <div id="signup-error" class="error-message"></div>
+            <!-- Message for email verification status (optional, but good practice) -->
+            <div id="auth-message" class="error-message" style="display: none; color: orange; margin-bottom: 10px;"></div>
             <input type="email" id="signup-email" placeholder="Email" required>
-            <input type="password" id="signup-password" placeholder="Password" required>
+            <input type="password" id="signup-password" placeholder="Password (min. 6 characters)" required>
             <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
             <button type="submit">Sign Up</button>
         </form>
