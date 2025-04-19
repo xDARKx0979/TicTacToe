@@ -1,0 +1,10 @@
+# Ignore sensitive config files
+firebase-init.js
+
+# Ignore Node modules folder
+node_modules/
+
+# Ignore OS-specific files
+.DS_Store
+*.swp
+*.swo 
