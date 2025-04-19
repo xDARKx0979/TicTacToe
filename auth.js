@@ -39,6 +39,17 @@ fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
     console.error('Error setting auth persistence:', error);
   });
 
+// Add a page-specific auth token in sessionStorage to enforce per-tab authentication
+// This ensures each new tab requires its own authentication
+const authTokenKey = 'page_auth_token';
+const pageAuthToken = sessionStorage.getItem(authTokenKey) || '';
+
+// Clear the token if opening a new page or tab - force reauth check
+if (!document.referrer || !document.referrer.includes(window.location.host)) {
+    console.log('New page/tab detected, clearing tab-specific auth token');
+    sessionStorage.removeItem(authTokenKey);
+}
+
 // Signup Function
 function handleSignup(event) {
     event.preventDefault();
@@ -125,6 +136,9 @@ function handleLogin(event) {
             // Signed in - DO NOT REDIRECT YET
             // onAuthStateChanged will handle checking survey and redirecting.
             console.log("User login API call successful, waiting for auth state change:", userCredential.user);
+            
+            // Set the page token for this tab upon successful login
+            sessionStorage.setItem(authTokenKey, Date.now().toString());
         })
         .catch((error) => {
             console.error("Login Error:", error.code, error.message);
@@ -141,6 +155,10 @@ function handleLogin(event) {
 // Logout Functionality
 function handleLogout() {
     console.log('Attempting logout...');
+    
+    // Clear the page token before signing out
+    sessionStorage.removeItem(authTokenKey);
+    
     fbAuth.signOut().then(() => {
         // onAuthStateChanged will handle the redirect
         console.log("User logged out successfully via button.");
@@ -243,22 +261,30 @@ fbAuth.onAuthStateChanged((user) => {
     const loginPath = '/login';
     const signupPath = '/signup';
     const surveyPath = '/survey'; 
-    // Add a dedicated page path if we create one later: const verifyEmailPath = '/verify-email';
+    const resetPath = '/reset-password';
+    // Explicitly define all auth-related pages
     const isLoginPage = currentPath === loginPath || currentPath === loginPath + '.html' || currentPath === '/';
     const isSignupPage = currentPath === signupPath || currentPath === signupPath + '.html';
+    const isResetPage = currentPath === resetPath || currentPath === resetPath + '.html';
     const isSurveyPage = currentPath === surveyPath || currentPath === surveyPath + '.html'; 
-    const isAuthPage = isLoginPage || isSignupPage; // Add verifyEmailPath here if created
+    const isAuthPage = isLoginPage || isSignupPage || isResetPage; // Auth pages don't require login
     // Define pages that an unverified user IS allowed to be on
-    const allowedUnverifiedPages = [loginPath, signupPath, '/', /* verifyEmailPath */]; 
+    const allowedUnverifiedPages = [loginPath, signupPath, resetPath, '/']; 
     const isAllowedUnverifiedPage = allowedUnverifiedPages.some(p => currentPath === p || currentPath === p + '.html');
 
-
     console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isSurveyPage=${isSurveyPage}, isAuthPage=${isAuthPage}, isAllowedUnverifiedPage=${isAllowedUnverifiedPage}`);
+
+    // Check for page token to enforce per-tab authentication
+    const hasPageToken = !!sessionStorage.getItem(authTokenKey);
+    console.log(`>>> Has page auth token: ${hasPageToken}`);
 
     if (user) {
         // User is signed IN (or just signed up)
         console.log('>>> Auth state: IN');
         document.body.classList.add('logged-in');
+
+        // Set the page token for this tab
+        sessionStorage.setItem(authTokenKey, Date.now().toString());
 
         // --- Check Email Verification FIRST ---
         if (!user.emailVerified) {
@@ -338,6 +364,9 @@ fbAuth.onAuthStateChanged((user) => {
         // User is signed OUT
         console.log('>>> Auth state: OUT');
         document.body.classList.remove('logged-in');
+        
+        // Clear the page token when signed out
+        sessionStorage.removeItem(authTokenKey);
 
         // If NOT on an auth page (or survey page - although they shouldn't reach it logged out), redirect TO login
          if (!isAuthPage && !isSurveyPage) { // Keep survey check here just in case
