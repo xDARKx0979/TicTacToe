@@ -139,12 +139,13 @@ fbAuth.onAuthStateChanged((user) => {
     }
     console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
-    // Define specific auth page paths
-    const loginPath = '/login.html';
-    const signupPath = '/signup.html';
-    const isLoginPage = currentPath === loginPath || currentPath === '/'; // Treat root as login
-    const isSignupPage = currentPath === signupPath;
-    const isAuthPage = isLoginPage || isSignupPage; // More explicit check
+    // Define specific auth page paths (without .html for Netlify compatibility)
+    const loginPath = '/login';
+    const signupPath = '/signup';
+    // Also check for .html versions in case they are accessed directly
+    const isLoginPage = currentPath === loginPath || currentPath === loginPath + '.html' || currentPath === '/';
+    const isSignupPage = currentPath === signupPath || currentPath === signupPath + '.html';
+    const isAuthPage = isLoginPage || isSignupPage;
 
     console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isAuthPage=${isAuthPage}`);
 
