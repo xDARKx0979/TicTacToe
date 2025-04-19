@@ -133,40 +133,44 @@ function handleLogout() {
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
-    console.log('onAuthStateChanged triggered. User:', user ? user.email : 'null');
+    console.log(`>>> onAuthStateChanged: Start. User: ${user ? user.email : 'null'}. Path: ${window.location.pathname}`);
     const currentPath = window.location.pathname;
-    const isLoginPage = currentPath.endsWith('/login.html') || currentPath === '/'; // Treat root as potentially login
+    const isLoginPage = currentPath.endsWith('/login.html') || currentPath === '/';
     const isSignupPage = currentPath.endsWith('/signup.html');
 
-    if (user) {
-        // User is signed in.
-        console.log('User is logged IN.');
-        document.body.classList.add('logged-in');
-        // If user is logged in and on login/signup, redirect to index or intended page
-        if (isLoginPage || isSignupPage) {
-            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-            sessionStorage.removeItem('redirectAfterLogin');
-            console.log(`User logged in, redirecting from ${currentPath} to ${redirectUrl}`);
-            window.location.href = redirectUrl;
+    // Add a small delay to potentially avoid race conditions during redirects
+    setTimeout(() => {
+        if (user) {
+            // User is signed in.
+            console.log('>>> onAuthStateChanged: User is IN.');
+            document.body.classList.add('logged-in');
+
+            if (isLoginPage || isSignupPage) {
+                const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+                sessionStorage.removeItem('redirectAfterLogin');
+                console.log(`>>> onAuthStateChanged: User IN, redirecting from Auth page (${currentPath}) to ${redirectUrl}`);
+                window.location.href = redirectUrl;
+            } else {
+                 console.log(`>>> onAuthStateChanged: User IN, on protected page (${currentPath}), staying.`);
+                 // User is logged in and on a protected page - do nothing.
+            }
         } else {
-             console.log(`User logged in on a protected page (${currentPath}), staying.`);
-             // User is logged in and on a protected page - do nothing, allow access.
+            // User is signed out.
+            console.log('>>> onAuthStateChanged: User is OUT.');
+            document.body.classList.remove('logged-in');
+
+            if (!isLoginPage && !isSignupPage) {
+                 console.log(`>>> onAuthStateChanged: User OUT, redirecting from protected page (${currentPath}) to login.`);
+                sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+                window.location.href = '/login.html';
+            } else {
+                console.log(`>>> onAuthStateChanged: User OUT, on login/signup page (${currentPath}), staying.`);
+                // User is logged out and on login/signup page - do nothing.
+            }
         }
-    } else {
-        // User is signed out.
-        console.log('User is logged OUT.');
-        document.body.classList.remove('logged-in');
-        // If user is logged out, *only* redirect if they are on a page that requires login (i.e., NOT login or signup)
-        if (!isLoginPage && !isSignupPage) {
-             console.log(`User logged out, redirecting from protected page (${currentPath}) to login.`);
-            // Store the page they tried to access *before* redirecting
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
-            window.location.href = '/login.html';
-        } else {
-            console.log(`User logged out on login/signup page (${currentPath}), staying.`);
-            // User is logged out and on login/signup page - do nothing, allow access.
-        }
-    }
+        console.log('>>> onAuthStateChanged: Finish processing.');
+    }, 50); // 50ms delay - adjust if needed, but keep it short
+
 });
 
 // --- Event Listeners (Run after DOM is loaded) ---
