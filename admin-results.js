@@ -1,6 +1,4 @@
-// Get references to Firebase services
-const fbAuth = firebase.auth();
-const db = firebase.firestore();
+// References will be obtained directly where needed
 
 // --- CONFIGURATION ---
 const ADMIN_UID = "II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2"; // <<< Your specific Firebase User ID
@@ -18,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const countDElem = document.getElementById('countD');
 
     // Check authentication state
-    fbAuth.onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(user => {
         if (user) {
             // User is logged in, check if their UID matches the admin UID
             if (user.uid === ADMIN_UID) {
@@ -42,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         unauthorizedDiv.style.display = 'none';
         contentDiv.style.display = 'none';
 
+        // Get db instance directly
+        const db = firebase.firestore();
         const resultsDocRef = db.collection('surveyResults').doc('aggregate');
 
         // Use onSnapshot for real-time updates (optional, could use .get() for one-time fetch)

@@ -1,18 +1,17 @@
-// Get references to Firebase services (initialized in firebase-init.js)
-const fbAuth = firebase.auth();
-const db = firebase.firestore();
-const { FieldValue } = firebase.firestore; // For atomic increments
+// Get references directly when needed, relying on firebase-init.js having run
+const { FieldValue } = firebase.firestore; // FieldValue is okay to keep
 
 document.addEventListener('DOMContentLoaded', () => {
     const surveyForm = document.getElementById('survey-form');
     const submitButton = document.getElementById('submit-survey');
     const errorElement = document.getElementById('survey-error');
 
-    // Redirect if user somehow lands here without being logged in
-    if (!fbAuth.currentUser) {
+    // Get current user directly
+    const initialUser = firebase.auth().currentUser; 
+    if (!initialUser) {
         console.log('User not logged in, redirecting from survey page to login.');
         window.location.href = '/login.html';
-        return; // Stop script execution
+        return; 
     }
 
     surveyForm.addEventListener('submit', (event) => {
@@ -31,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const user = fbAuth.currentUser;
+        // Get user again inside the event listener to be safe
+        const user = firebase.auth().currentUser;
         if (!user) {
             // Should not happen due to initial check, but safeguard
             errorElement.textContent = 'Error: Not logged in. Redirecting...';
@@ -41,17 +41,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const userId = user.uid;
+        // Get db instance directly
+        const db = firebase.firestore(); 
         const userDocRef = db.collection('users').doc(userId);
         const resultsDocRef = db.collection('surveyResults').doc('aggregate');
 
         console.log(`Submitting survey choice: User=${userId}, Choice=${choice}`);
 
-        // Determine which counter to increment
-        const incrementField = `count${choice}`; // e.g., countA, countB
+        const incrementField = `count${choice}`; 
         const updateData = {};
         updateData[incrementField] = FieldValue.increment(1);
 
-        // Use a Firestore transaction to update both documents atomically
+        // Use db instance directly
         db.runTransaction((transaction) => {
             return transaction.get(resultsDocRef).then((resultsDoc) => {
                 // Update user document
