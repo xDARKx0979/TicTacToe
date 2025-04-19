@@ -73,9 +73,13 @@
         <h1>Login</h1>
         <form id="login-form" class="auth-form">
             <div id="login-error" class="error-message"></div>
+            <!-- Message for email verification status -->
+            <div id="auth-message" class="error-message" style="display: none; color: orange; margin-bottom: 10px;"></div>
             <input type="email" id="login-email" placeholder="Email" required>
             <input type="password" id="login-password" placeholder="Password" required>
             <button type="submit">Log In</button>
+            <!-- Button to resend verification email -->
+             <button type="button" id="resend-verification-button" style="display: none; margin-top: 10px; width: 100%; padding: 10px; background-color: var(--secondary-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer;">Resend Verification Email</button>
         </form>
         <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
     </div>
