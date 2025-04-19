@@ -169,6 +169,52 @@ function handleResendVerificationEmail() {
     }
 }
 
+// --- Add Password Reset Function ---
+function handlePasswordReset(event) {
+    event.preventDefault();
+    const email = document.getElementById('reset-email').value.trim();
+    const errorElement = document.getElementById('reset-error');
+    const successElement = document.getElementById('reset-success');
+    
+    // Clear previous messages
+    errorElement.textContent = '';
+    errorElement.style.display = 'none';
+    successElement.textContent = '';
+    successElement.style.display = 'none';
+
+    if (!email) {
+        errorElement.textContent = 'Please enter your email address.';
+        errorElement.style.display = 'block';
+        return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        errorElement.textContent = 'Please enter a valid email address.';
+        errorElement.style.display = 'block';
+        return;
+    }
+
+    console.log('Attempting password reset for:', email);
+    fbAuth.sendPasswordResetEmail(email)
+        .then(() => {
+            console.log("Password reset email sent successfully.");
+            successElement.textContent = 'Password reset email sent. Please check your inbox (and spam folder).';
+            successElement.style.display = 'block';
+            // Optionally clear the email field
+            // document.getElementById('reset-email').value = ''; 
+        })
+        .catch((error) => {
+            console.error("Password Reset Error:", error.code, error.message);
+            if (error.code === 'auth/user-not-found') {
+                errorElement.textContent = 'Email not linked to an account. Please sign up.';
+            } else if (error.code === 'auth/invalid-email') {
+                errorElement.textContent = 'Please enter a valid email address.';
+            } else {
+                errorElement.textContent = 'Failed to send reset email. Please try again later.';
+            }
+            errorElement.style.display = 'block';
+        });
+}
+
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
@@ -302,6 +348,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signup-form');
     const loginForm = document.getElementById('login-form');
     const logoutButton = document.getElementById('logout-button');
+    const resendBtn = document.getElementById('resend-verification-button');
+    
+    // --- Password Reset Elements ---
+    const resetForm = document.getElementById('reset-form');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const backToLoginLink = document.getElementById('back-to-login-link');
+    const loginContainer = loginForm ? loginForm.closest('.auth-container') : null; // Find the main login container
+    const resetContainer = document.getElementById('reset-container');
+    // -----------------------------
 
     if (signupForm) {
         signupForm.addEventListener('submit', handleSignup);
@@ -311,14 +366,38 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', handleLogin);
     }
 
-    // Logout button might not be present on login/signup pages
     if (logoutButton) {
         logoutButton.addEventListener('click', handleLogout);
     }
 
-    // Add listener for the new resend button
-    const resendBtn = document.getElementById('resend-verification-button');
     if (resendBtn) {
         resendBtn.addEventListener('click', handleResendVerificationEmail);
     }
+
+    // --- Password Reset Listeners ---
+    if (resetForm) {
+        resetForm.addEventListener('submit', handlePasswordReset);
+    }
+
+    if (forgotPasswordLink && loginContainer && resetContainer) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginContainer.style.display = 'none';
+            resetContainer.style.display = 'block';
+        });
+    }
+
+    if (backToLoginLink && loginContainer && resetContainer) {
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+            // Clear any reset messages when going back
+            const resetError = document.getElementById('reset-error');
+            const resetSuccess = document.getElementById('reset-success');
+            if(resetError) resetError.style.display = 'none';
+            if(resetSuccess) resetSuccess.style.display = 'none';
+        });
+    }
+    // -----------------------------
 }); 

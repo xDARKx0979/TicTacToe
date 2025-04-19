@@ -82,6 +82,22 @@
              <button type="button" id="resend-verification-button" style="display: none; margin-top: 10px; width: 100%; padding: 10px; background-color: var(--secondary-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer;">Resend Verification Email</button>
         </form>
         <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+        <p style="margin-top: 10px;"><a href="#" id="forgot-password-link" style="font-size: 0.9em;">Forgot Password?</a></p>
+    </div>
+
+    <!-- Hidden Password Reset Form -->
+    <div class="auth-container" id="reset-container" style="display: none;">
+        <h1>Reset Password</h1>
+        <form id="reset-form" class="auth-form">
+            <p style="margin-bottom: 15px; color: var(--text-light); font-size: 0.9em;">Enter your email address and we'll send you a link to reset your password.</p>
+            <div id="reset-error" class="error-message"></div>
+            <div id="reset-success" class="success-message" style="color: green; margin-bottom: 15px; display: none;"></div> 
+             <!-- Message for email verification status - reused -->
+             <div id="auth-message" class="error-message" style="display: none; color: orange; margin-bottom: 10px;"></div>
+            <input type="email" id="reset-email" placeholder="Email" required>
+            <button type="submit">Send Reset Link</button>
+        </form>
+        <p style="margin-top: 10px;"><a href="#" id="back-to-login-link" style="font-size: 0.9em;">Back to Login</a></p>
     </div>
     
     <!-- Firebase Init and Auth Logic -->
