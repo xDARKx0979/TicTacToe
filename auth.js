@@ -1,3 +1,47 @@
+// DIRECT SECURITY CHECK - This runs IMMEDIATELY!
+// This needs to be the very first code in the file
+(() => {
+  // Skip this check only on explicitly allowed pages
+  const currentPath = window.location.pathname;
+  const isLoginPage = currentPath === '/login.html' || currentPath === '/login';
+  const isSignupPage = currentPath === '/signup.html' || currentPath === '/signup';
+  const isResetPage = currentPath === '/reset-password.html' || currentPath === '/reset-password';
+  
+  // If not on an allowed page, enforce strict authentication
+  if (!isLoginPage && !isSignupPage && !isResetPage) {
+    console.log('⚠️ SECURITY: Protected page access attempt: ' + currentPath);
+    
+    // Check for Firebase auth in local storage - this is where Firebase actually stores its state
+    let hasAuth = false;
+    
+    // Check for Firebase auth in localStorage keys that start with "firebase:authUser:"
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('firebase:authUser:')) {
+        hasAuth = true;
+        break;
+      }
+    }
+    
+    // Also check sessionStorage as a backup
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith('firebase:authUser:')) {
+        hasAuth = true;
+        break;
+      }
+    }
+    
+    if (!hasAuth) {
+      console.log('⚠️ SECURITY: No auth detected, forcing redirect');
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+      window.location.replace('/login.html');
+      // Stop all further script execution
+      throw new Error('Unauthorized access blocked');
+    }
+  }
+})();
+
 // --- Helper Functions ---
 
 function displayError(elementId, message) {
@@ -204,17 +248,45 @@ function handleLogin(event) {
 function handleLogout() {
     console.log('Attempting logout...');
     
-    // Clear the strict auth token before signing out
-    sessionStorage.removeItem(authTokenKey);
+    // Clear ALL storage that could contain auth data
+    sessionStorage.clear(); // Clear all sessionStorage
     
-    fbAuth.signOut().then(() => {
-        // onAuthStateChanged will handle the redirect
-        console.log("User logged out successfully via button.");
-        // Explicitly redirect here as well for immediate feedback
-        window.location.href = '/login.html'; 
-    }).catch((error) => {
-        console.error("Logout Error:", error);
-    });
+    // Find and remove any Firebase localStorage items
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('firebase:') || key.includes('firebaseLocalStorage'))) {
+            localStorage.removeItem(key);
+        }
+    }
+    
+    // Use both signOut methods for maximum reliability
+    if (firebase && firebase.auth) {
+        firebase.auth().signOut()
+            .then(() => {
+                console.log("Firebase signOut successful");
+                forceRedirectToLogin();
+            })
+            .catch((error) => {
+                console.error("Firebase signOut error:", error);
+                // Redirect anyway
+                forceRedirectToLogin();
+            });
+    } else {
+        console.error("Firebase auth not available, forcing redirect anyway");
+        forceRedirectToLogin();
+    }
+}
+
+// Helper function to ensure redirect happens
+function forceRedirectToLogin() {
+    console.log("Forcing logout redirect");
+    // Use replace instead of href to prevent history navigation issues
+    window.location.replace('/login.html');
+    
+    // Extra safety measure - if redirect doesn't happen within 500ms, reload page
+    setTimeout(() => {
+        window.location.reload();
+    }, 500);
 }
 
 // --- Add Resend Verification Email Function ---
