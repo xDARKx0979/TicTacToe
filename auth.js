@@ -29,6 +29,16 @@ try {
 // Get Firebase Auth instance (initialized in firebase-init.js)
 const fbAuth = firebase.auth();
 
+// Set persistence to SESSION to prevent automatic login after browser restart
+// This makes users login again after closing the browser
+fbAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .then(() => {
+    console.log('Firebase auth persistence set to SESSION');
+  })
+  .catch((error) => {
+    console.error('Error setting auth persistence:', error);
+  });
+
 // Signup Function
 function handleSignup(event) {
     event.preventDefault();
