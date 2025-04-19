@@ -71,12 +71,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }).then(() => {
-            console.log('Survey submitted successfully!');
+            console.log('>>> Survey TX success!');
             // Redirect user to their original destination or index page
-            const redirectUrl = sessionStorage.getItem('redirectAfterSurvey') || '/index.html';
-            sessionStorage.removeItem('redirectAfterSurvey');
-            console.log('Redirecting to:', redirectUrl);
-            window.location.href = redirectUrl;
+            const storedRedirect = sessionStorage.getItem('redirectAfterSurvey');
+            console.log(`>>> redirectAfterSurvey from sessionStorage: ${storedRedirect}`);
+            const redirectUrl = storedRedirect || '/index.html';
+            console.log(`>>> Calculated redirectUrl: ${redirectUrl}`);
+            
+            // Attempting redirect
+            try {
+                sessionStorage.removeItem('redirectAfterSurvey'); // Remove before redirect
+                console.log(`>>> Attempting redirect to: ${redirectUrl}`);
+                window.location.href = redirectUrl;
+                console.log('>>> Redirect command issued.'); // This might not log if redirect is immediate
+            } catch (e) {
+                console.error('>>> Error during redirect attempt:', e);
+                // Fallback UI feedback if redirect fails
+                errorElement.textContent = 'Survey saved! Redirecting...'; 
+                errorElement.style.display = 'block';
+            }
         }).catch((error) => {
             console.error("Error submitting survey:", error);
             errorElement.textContent = 'Failed to submit survey. Please try again.';
