@@ -54,10 +54,15 @@ try {
         return;
     }
     
+    // If user has a valid token in this session, don't redirect
+    if (sessionStorage.getItem(authTokenKey)) {
+        console.log('>>> Active auth token found, allowing immediate access check to proceed');
+        return;
+    }
+    
     console.log('>>> Running immediate auth check for:', currentPath);
     
     // Clear any lingering auth tokens
-    const authTokenKey = 'strict_auth_token';
     sessionStorage.removeItem(authTokenKey);
     
     // Force redirect to login if not on an auth page
@@ -164,16 +169,26 @@ function handleLogin(event) {
     }
     console.log('Attempting login for:', email);
 
+    // Set the strict auth token BEFORE login to ensure it's available
+    // when the auth state changes
+    sessionStorage.setItem(authTokenKey, Date.now().toString());
+    console.log('Auth token set to:', sessionStorage.getItem(authTokenKey));
+
     fbAuth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             // Signed in - DO NOT REDIRECT YET
             // onAuthStateChanged will handle checking survey and redirecting.
             console.log("User login API call successful, waiting for auth state change:", userCredential.user);
             
-            // Set the strict auth token for this session
-            sessionStorage.setItem(authTokenKey, Date.now().toString());
+            // Double-check token is set
+            if (!sessionStorage.getItem(authTokenKey)) {
+                sessionStorage.setItem(authTokenKey, Date.now().toString());
+                console.log('Auth token re-set after login');
+            }
         })
         .catch((error) => {
+            // Clear token if login fails
+            sessionStorage.removeItem(authTokenKey);
             console.error("Login Error:", error.code, error.message);
             let message = 'Invalid email or password.';
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -296,7 +311,16 @@ fbAuth.onAuthStateChanged((user) => {
     const hasAuthToken = !!sessionStorage.getItem(authTokenKey);
     console.log(`>>> Has strict auth token: ${hasAuthToken}`);
 
-    if (user && hasAuthToken) {
+    // SPECIAL CASE: If on login page and user is authenticated, ensure auth token is set
+    if (user && (currentPath === '/login' || currentPath === '/login.html') && !hasAuthToken) {
+        console.log('>>> Setting auth token for logged in user on login page');
+        sessionStorage.setItem(authTokenKey, Date.now().toString());
+    }
+
+    // Update has auth token after potential update
+    const finalHasAuthToken = !!sessionStorage.getItem(authTokenKey);
+    
+    if (user && finalHasAuthToken) {
         // User is authenticated AND has a valid token for this session
         console.log('>>> Auth state: STRICT_AUTHENTICATED');
         document.body.classList.add('logged-in');
@@ -377,8 +401,10 @@ fbAuth.onAuthStateChanged((user) => {
         console.log('>>> Auth state: NOT_AUTHENTICATED');
         document.body.classList.remove('logged-in');
         
-        // Clear the auth token
-        sessionStorage.removeItem(authTokenKey);
+        // Don't clear the auth token if on login page - leave it for login function
+        if (!isAuthPagePath) {
+            sessionStorage.removeItem(authTokenKey);
+        }
 
         // If NOT on an auth page, redirect TO login
         if (!isAuthPagePath && !isSurveyPage) {
