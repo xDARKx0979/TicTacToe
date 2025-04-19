@@ -6,19 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitButton = document.getElementById('submit-survey');
     const errorElement = document.getElementById('survey-error');
 
-    // Get current user directly
-    const initialUser = firebase.auth().currentUser; 
-    if (!initialUser) {
-        console.log('User not logged in, redirecting from survey page to login.');
-        window.location.href = '/login.html';
-        return; 
-    }
-
     surveyForm.addEventListener('submit', (event) => {
         event.preventDefault(); // Prevent default form submission
         submitButton.disabled = true; // Disable button during submission
         errorElement.style.display = 'none';
         errorElement.textContent = '';
+
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            // Should not happen if auth.js is working, but good safeguard
+            errorElement.textContent = 'Error: Not logged in. Please login again.';
+            errorElement.style.display = 'block';
+            submitButton.disabled = false;
+            console.error('Survey submission attempted but user is null.');
+            // Optional: redirect after delay
+            // setTimeout(() => { window.location.href = '/login.html'; }, 2000);
+            return;
+        }
 
         const formData = new FormData(surveyForm);
         const choice = formData.get('monetization_choice');
@@ -27,16 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             errorElement.textContent = 'Please select an option.';
             errorElement.style.display = 'block';
             submitButton.disabled = false;
-            return;
-        }
-
-        // Get user again inside the event listener to be safe
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            // Should not happen due to initial check, but safeguard
-            errorElement.textContent = 'Error: Not logged in. Redirecting...';
-            errorElement.style.display = 'block';
-            setTimeout(() => { window.location.href = '/login.html'; }, 2000);
             return;
         }
 

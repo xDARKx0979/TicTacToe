@@ -175,14 +175,15 @@ fbAuth.onAuthStateChanged((user) => {
                 }
             }).catch((error) => {
                 console.error("Error checking survey status:", error);
-                // Fallback: redirect to index to avoid getting stuck
-                 if (isAuthPage) { // Only redirect away from auth pages on error
-                     const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-                     sessionStorage.removeItem('redirectAfterLogin');
-                     window.location.href = redirectUrl;
-                 } else {
-                      console.warn("Could not check survey status, staying on page.")
-                 }
+                // --- MODIFIED ERROR HANDLING ---
+                // If we fail to check the survey status for a logged-in user,
+                // assume they haven't completed it and send them to the survey page
+                // to be safe. Don't redirect if already on survey page (shouldn't happen here).
+                console.warn("Could not check survey status due to error, redirecting to survey page.");
+                sessionStorage.setItem('redirectAfterSurvey', sessionStorage.getItem('redirectAfterLogin') || currentPath); 
+                sessionStorage.removeItem('redirectAfterLogin'); 
+                window.location.href = '/survey.html';
+                // --- END MODIFIED ERROR HANDLING ---
             });
         } else {
             // User is on the survey page, let survey.js handle logic
