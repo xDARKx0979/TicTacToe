@@ -14,10 +14,11 @@ const firebaseConfig = {
 // Use compat version for easier integration with existing script structure
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(); // Get the auth service
+const db = firebase.firestore(); // Get the Firestore service
 
 // Optional: Initialize Analytics if measurementId is provided
 // if (firebaseConfig.measurementId) {
 //   const analytics = firebase.analytics();
 // }
 
-console.log("Firebase initialized."); 
+console.log("Firebase initialized with Auth and Firestore."); 

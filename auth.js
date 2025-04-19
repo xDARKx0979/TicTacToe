@@ -139,27 +139,53 @@ fbAuth.onAuthStateChanged((user) => {
     }
     console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
-    // Define specific auth page paths (without .html for Netlify compatibility)
     const loginPath = '/login';
     const signupPath = '/signup';
-    // Also check for .html versions in case they are accessed directly
+    const surveyPath = '/survey'; // Define survey path
     const isLoginPage = currentPath === loginPath || currentPath === loginPath + '.html' || currentPath === '/';
     const isSignupPage = currentPath === signupPath || currentPath === signupPath + '.html';
+    const isSurveyPage = currentPath === surveyPath || currentPath === surveyPath + '.html'; // Check if on survey page
     const isAuthPage = isLoginPage || isSignupPage;
 
-    console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isAuthPage=${isAuthPage}`);
+    console.log(`>>> Debug state: isLoginPage=${isLoginPage}, isSignupPage=${isSignupPage}, isSurveyPage=${isSurveyPage}, isAuthPage=${isAuthPage}`);
 
     if (user) {
         // User is signed IN
         console.log('>>> Auth state: IN');
         document.body.classList.add('logged-in');
 
-        if (isAuthPage) {
-            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-            sessionStorage.removeItem('redirectAfterLogin');
-            console.log(`>>> Redirecting IN user from ${currentPath} to ${redirectUrl}`);
-            window.location.href = redirectUrl;
+        // If on an auth page or the survey page, check survey completion before redirecting
+        if (isAuthPage || isSurveyPage) {
+            const userDocRef = db.collection('users').doc(user.uid);
+            userDocRef.get().then((doc) => {
+                if (doc.exists && doc.data().surveyCompleted === true) {
+                    // Survey already completed, redirect to intended destination or index
+                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    console.log(`>>> Survey completed, redirecting IN user from ${currentPath} to ${redirectUrl}`);
+                    window.location.href = redirectUrl;
+                } else {
+                    // Survey not completed or user doc doesn't exist yet
+                    // If NOT already on survey page, redirect TO survey page
+                    if (!isSurveyPage) {
+                        console.log(`>>> Survey NOT completed, redirecting IN user from ${currentPath} to /survey.html`);
+                        sessionStorage.setItem('redirectAfterSurvey', sessionStorage.getItem('redirectAfterLogin') || '/index.html'); // Store final destination
+                        sessionStorage.removeItem('redirectAfterLogin'); // Clean up old redirect item
+                        window.location.href = '/survey.html';
+                    } else {
+                        console.log(`>>> Survey NOT completed, staying on survey page.`);
+                        // Already on survey page, do nothing.
+                    }
+                }
+            }).catch((error) => {
+                console.error("Error checking survey status:", error);
+                // Fallback: redirect to index to avoid getting stuck
+                const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+                sessionStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
+            });
         } else {
+            // User is IN and on a protected page (already checked survey implicitly)
             console.log(`>>> Staying on protected page: ${currentPath}`);
         }
     } else {
@@ -167,12 +193,14 @@ fbAuth.onAuthStateChanged((user) => {
         console.log('>>> Auth state: OUT');
         document.body.classList.remove('logged-in');
 
-        if (!isAuthPage) {
+        // If NOT on an auth page or survey page, redirect TO login
+        if (!isAuthPage && !isSurveyPage) {
             console.log(`>>> Redirecting OUT user from protected page ${currentPath} to /login.html`);
             sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
             window.location.href = '/login.html';
         } else {
-            console.log(`>>> Staying on auth page: ${currentPath}`);
+             // User is OUT and on an auth page or survey page - do nothing.
+            console.log(`>>> Staying on auth/survey page: ${currentPath}`);
         }
     }
 });

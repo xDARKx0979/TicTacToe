@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Survey</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <style>
+        .survey-container {
+            max-width: 600px;
+            margin: 80px auto;
+            padding: 30px;
+            background: var(--card-bg, white);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .survey-container h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--text-color, #333);
+        }
+        .survey-question {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .survey-options label {
+            display: block;
+            background: var(--button-bg, #f8f8f8);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color, #ddd);
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .survey-options input[type="radio"] {
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+         .survey-options span {
+             vertical-align: middle;
+         }
+        .survey-options label:hover {
+            background-color: var(--cell-hover, #e0e0e0);
+            border-color: #bbb;
+        }
+        .survey-options input[type="radio"]:checked + span {
+             font-weight: bold;
+        }
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 25px;
+            background: var(--primary-color, #4CAF50);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        .submit-button:hover {
+            background: var(--primary-hover-color, #3e8e41);
+        }
+        .submit-button:disabled {
+             background: #cccccc;
+             cursor: not-allowed;
+        }
+        .error-message {
+            color: #dc3545;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="survey-container">
+        <h1>Quick Question!</h1>
+        <form id="survey-form">
+            <p class="survey-question">Which system would you like best for accessing more popular games?</p>
+            <div class="survey-options">
+                <label>
+                    <input type="radio" name="monetization_choice" value="A" required>
+                    <span>A) $1.99/month subscription</span>
+                </label>
+                <label>
+                    <input type="radio" name="monetization_choice" value="B" required>
+                    <span>B) $9.99 one-time purchase</span>
+                </label>
+                <label>
+                    <input type="radio" name="monetization_choice" value="C" required>
+                    <span>C) Both A & B available as options</span>
+                </label>
+                <label>
+                    <input type="radio" name="monetization_choice" value="D" required>
+                    <span>D) Ads on site (with option to pay $4.99/month or $19.99 one-time to remove)</span>
+                </label>
+            </div>
+            <button type="submit" id="submit-survey" class="submit-button">Submit Answer</button>
+            <p id="survey-error" class="error-message"></p>
+        </form>
+    </div>
+
+    <!-- Firebase Init, Auth Logic (for user ID), Survey Logic -->
+    <script src="firebase-init.js"></script> 
+    <script src="auth.js"></script> 
+    <script src="survey.js"></script> <!-- We'll create this next -->
+    <script src="theme.js"></script>
+</body>
+</html> 
