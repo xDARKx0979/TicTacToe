@@ -16,6 +16,14 @@ function clearError(elementId) {
     }
 }
 
+// --- Attempt to clear old insecure data ---
+try {
+    localStorage.removeItem('users');
+    console.log('Attempted to remove old user data from localStorage.');
+} catch (e) {
+    console.warn('Could not remove old data from localStorage:', e);
+}
+
 // --- Firebase Authentication Logic ---
 
 // Get Firebase Auth instance (initialized in firebase-init.js)
@@ -47,14 +55,16 @@ function handleSignup(event) {
         return;
     }
 
+    console.log('Attempting signup for:', email);
     fbAuth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Signed up and signed in
-            console.log("User signed up successfully:", userCredential.user);
-            window.location.href = 'index.html'; // Redirect to main page
+            // Signed up and signed in 
+            // onAuthStateChanged will handle the redirect
+            console.log("User signed up successfully, waiting for auth state change:", userCredential.user);
+            // No direct redirect here - let onAuthStateChanged handle it
         })
         .catch((error) => {
-            console.error("Signup Error:", error);
+            console.error("Signup Error:", error.code, error.message);
             // Provide user-friendly error messages
             let message = 'Signup failed. Please try again.';
             if (error.code === 'auth/email-already-in-use') {
@@ -81,17 +91,21 @@ function handleLogin(event) {
         return;
     }
 
+    console.log('Attempting login for:', email);
     fbAuth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             // Signed in
-            console.log("User logged in successfully:", userCredential.user);
-            // Redirect to intended page or index.html
-            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
-            sessionStorage.removeItem('redirectAfterLogin'); 
-            window.location.href = redirectUrl;
+            // onAuthStateChanged will handle the redirect
+            console.log("User logged in successfully, waiting for auth state change:", userCredential.user);
+             // Clear potential redirect item *before* potentially navigating away from login page
+            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html'; 
+            sessionStorage.removeItem('redirectAfterLogin');
+            // We *can* redirect here, or let onAuthStateChanged handle it.
+            // Let's keep the redirect here for now for immediate feedback after login button click.
+            window.location.href = redirectUrl; 
         })
         .catch((error) => {
-            console.error("Login Error:", error);
+            console.error("Login Error:", error.code, error.message);
             let message = 'Invalid email or password.';
             // Firebase provides more specific error codes like auth/user-not-found, auth/wrong-password
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -105,48 +119,54 @@ function handleLogin(event) {
 
 // Logout Functionality
 function handleLogout() {
+    console.log('Attempting logout...');
     fbAuth.signOut().then(() => {
-        console.log("User logged out successfully.");
-        sessionStorage.removeItem('redirectAfterLogin'); // Clear any pending redirect
-        window.location.href = '/login.html'; // Redirect to login page
+        // onAuthStateChanged will handle the redirect
+        console.log("User logged out successfully via button.");
+        // Explicitly redirect here as well for immediate feedback
+        window.location.href = '/login.html'; 
     }).catch((error) => {
         console.error("Logout Error:", error);
-        // Handle logout errors if necessary
     });
 }
 
 // Check Authentication State Changes
+console.log('Setting up onAuthStateChanged listener...');
 fbAuth.onAuthStateChanged((user) => {
-    const isLoginPage = window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('/') && !window.location.pathname.includes('games');
-    const isSignupPage = window.location.pathname.endsWith('signup.html');
-    const pathSegments = window.location.pathname.split('/').filter(Boolean); // Remove empty segments
-    const currentPage = pathSegments.length > 0 ? pathSegments[pathSegments.length -1] : 'index.html';
-    const isProtected = !isLoginPage && !isSignupPage; // Define which pages need auth
+    console.log('onAuthStateChanged triggered. User:', user ? user.email : 'null');
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath.endsWith('/login.html') || currentPath === '/'; // Treat root as potentially login
+    const isSignupPage = currentPath.endsWith('/signup.html');
 
     if (user) {
         // User is signed in.
-        console.log("Auth state changed: User is logged in", user.email);
-        // If user is logged in and tries to access login/signup, redirect to index
+        console.log('User is logged IN.');
+        document.body.classList.add('logged-in');
+        // If user is logged in and on login/signup, redirect to index or intended page
         if (isLoginPage || isSignupPage) {
-            console.log("User already logged in, redirecting from auth page to index.");
-            window.location.href = '/index.html';
+            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+            sessionStorage.removeItem('redirectAfterLogin');
+            console.log(`User logged in, redirecting from ${currentPath} to ${redirectUrl}`);
+            window.location.href = redirectUrl;
+        } else {
+             console.log(`User logged in on a protected page (${currentPath}), staying.`);
+             // User is logged in and on a protected page - do nothing, allow access.
         }
-        // Add a class to body if you want to style based on login status
-        document.body.classList.add('logged-in'); 
     } else {
         // User is signed out.
-        console.log("Auth state changed: User is logged out.");
+        console.log('User is logged OUT.');
         document.body.classList.remove('logged-in');
-        // If user is logged out and tries to access a protected page, redirect to login
-        if (isProtected) {
-            console.log(`User logged out, redirecting from protected page (${currentPage}) to login.`);
+        // If user is logged out, *only* redirect if they are on a page that requires login (i.e., NOT login or signup)
+        if (!isLoginPage && !isSignupPage) {
+             console.log(`User logged out, redirecting from protected page (${currentPath}) to login.`);
             // Store the page they tried to access *before* redirecting
             sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
             window.location.href = '/login.html';
+        } else {
+            console.log(`User logged out on login/signup page (${currentPath}), staying.`);
+            // User is logged out and on login/signup page - do nothing, allow access.
         }
     }
-    // Hide loading indicator or show page content now that auth state is known
-    // document.body.classList.remove('auth-loading'); // Example: if you added a loading state
 });
 
 // --- Event Listeners (Run after DOM is loaded) ---
