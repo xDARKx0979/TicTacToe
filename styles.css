@@ -517,11 +517,12 @@ body {
     box-sizing: border-box;
 }
 
+/* General style for buttons within auth forms */
 .auth-form button {
     width: 100%;
     padding: 12px;
     background: var(--primary-color);
-    color: white; /* Default button text color is white */
+    /* Remove default white color, let specific rules handle it */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -530,19 +531,22 @@ body {
     transition: background 0.2s;
 }
 
-/* Specific style for signup button in light mode */
-:not(.dark-mode) #signup-form button {
-    color: white; /* Ensure text stays white in light mode */
+/* Specific style for signup button */
+#signup-form button {
+    color: black; /* Default to black for light mode */
 }
 
-.dark-mode .auth-form button {
-     color: white; /* Ensure text stays white in dark mode too */
+/* Override signup button color for dark mode */
+.dark-mode #signup-form button {
+     color: white; /* White text in dark mode */
 }
 
+/* General hover style */
 .auth-form button:hover {
     background: var(--primary-hover-color);
 }
 
+/* Styles for other elements in auth container */
 .auth-container p {
     margin-top: 20px;
     color: var(--text-secondary);
@@ -557,6 +561,7 @@ body {
     text-decoration: underline;
 }
 
+/* Error message styling */
 .error-message {
     background-color: var(--error-bg);
     color: var(--error-text);
@@ -568,6 +573,7 @@ body {
     display: block; /* Ensure it takes space */
 }
 
+/* Notice box styling */
 .notice-box {
     background-color: #fff3cd;
     color: #856404;
@@ -580,6 +586,7 @@ body {
     text-align: left;
 }
 
+/* Resend button styling */
 #resend-verification-button {
     margin-top: 15px;
     padding: 10px 20px;
@@ -598,13 +605,14 @@ body {
     cursor: not-allowed;
 }
 
+/* Auth message area styling */
 #auth-message { /* Used on login/verify pages */
     margin-top: 20px;
     padding: 10px;
     border-radius: 5px;
 }
 
-/* Specific message styles if needed */
+/* Success message styling */
 .success-message {
      color: var(--success-text);
      background-color: var(--success-bg);
