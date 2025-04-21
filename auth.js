@@ -66,17 +66,33 @@ function getCleanPath() {
     if (path !== '/' && path.endsWith('/')) {
         path = path.slice(0, -1);
     }
+    // Normalize .html extensions
+    if (path.endsWith('.html')) {
+         path = path.slice(0, -5);
+    }
+    if (path === '') path = '/index'; // Treat root as index
     return path;
 }
 
-function isAuthPage(path) {
-    const loginPath = '/login';
-    const signupPath = '/signup';
-    const resetPath = '/reset-password';
-    return path === loginPath || path === loginPath + '.html' || 
-           path === signupPath || path === signupPath + '.html' || 
-           path === resetPath || path === resetPath + '.html';
-    // Removed '/' so homepage requires authentication
+const LOGIN_PATH = '/login';
+const SIGNUP_PATH = '/signup';
+const RESET_PATH = '/reset-password';
+const VERIFY_EMAIL_PATH = '/verify-email';
+const SURVEY_PATH = '/survey';
+const INDEX_PATH = '/index';
+
+// Pages that DO NOT require the user to be authenticated
+const PUBLIC_PAGES = [LOGIN_PATH, SIGNUP_PATH, RESET_PATH, VERIFY_EMAIL_PATH];
+
+// Pages that DO NOT require the user's email to be verified
+const ALLOWED_UNVERIFIED_PAGES = [LOGIN_PATH, SIGNUP_PATH, RESET_PATH, VERIFY_EMAIL_PATH];
+
+function isPublicPage(path) {
+    return PUBLIC_PAGES.includes(path);
+}
+
+function isAllowedUnverifiedPage(path) {
+     return ALLOWED_UNVERIFIED_PAGES.includes(path);
 }
 
 // --- Attempt to clear old insecure data ---
@@ -92,27 +108,35 @@ try {
 (function immediateAuthCheck() {
     const currentPath = getCleanPath();
     
-    // Skip immediate check on auth pages
-    if (isAuthPage(currentPath)) {
-        console.log('>>> On auth page, skipping immediate auth check');
+    // Skip this check only on explicitly public pages
+    if (isPublicPage(currentPath)) {
+        console.log('Public page, skipping immediate auth check');
         return;
     }
-    
-    // If user has a valid token in this session, don't redirect
-    if (sessionStorage.getItem(authTokenKey)) {
-        console.log('>>> Active auth token found, allowing immediate access check to proceed');
-        return;
+
+    console.log('⚠️ SECURITY: Protected page access attempt: ' + currentPath);
+
+    // Check for Firebase auth in local/session storage
+    let hasAuth = false;
+    const storageKeys = [localStorage, sessionStorage];
+    for (const storage of storageKeys) {
+        for (let i = 0; i < storage.length; i++) {
+            const key = storage.key(i);
+            if (key && key.startsWith('firebase:authUser:')) {
+                hasAuth = true;
+                break;
+            }
+        }
+        if (hasAuth) break;
     }
-    
-    console.log('>>> Running immediate auth check for:', currentPath);
-    
-    // Clear any lingering auth tokens
-    sessionStorage.removeItem(authTokenKey);
-    
-    // Force redirect to login if not on an auth page
-    console.log('>>> Forcing redirect to login from:', currentPath);
-    sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
-    window.location.href = '/login.html';
+
+    if (!hasAuth) {
+        console.log('⚠️ SECURITY: No auth detected, forcing redirect');
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+        window.location.replace(LOGIN_PATH + '.html');
+        // Stop all further script execution
+        throw new Error('Unauthorized access blocked');
+    }
 })();
 
 // --- Firebase Authentication Logic ---
@@ -162,27 +186,25 @@ function handleSignup(event) {
     fbAuth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             // Signed up 
-            console.log("User signed up successfully:", userCredential.user);
+            const user = userCredential.user;
+            console.log("User signed up successfully:", user);
             
             // Send verification email
-            userCredential.user.sendEmailVerification()
+            user.sendEmailVerification()
                 .then(() => {
                     console.log("Verification email sent.");
-                    // Optionally, display a message on the signup form confirmation area
-                    // e.g., clearError('signup-error'); 
-                    // displayError('signup-success', 'Signup successful! Please check your email to verify your account before logging in.'); 
-                    // Maybe automatically redirect to login page after a delay?
-                    // Or just let onAuthStateChanged handle showing the message later.
-                    // For now, just log it. We'll add UI prompts via onAuthStateChanged.
+                    // Store email for display on verification page
+                    sessionStorage.setItem('emailForVerification', email);
+                    // Redirect to the email verification page
+                    window.location.href = '/verify-email.html'; 
                 })
                 .catch((error) => {
                     console.error("Error sending verification email:", error);
                     // Display a generic signup error, but log the specific issue
-                     displayError('signup-error', 'Signup successful, but failed to send verification email. Please contact support or try logging in later.');
+                     displayError('signup-error', 'Signup successful, but failed to send verification email. Please try logging in later or contact support.');
                 });
             
-            // Let onAuthStateChanged handle redirects/state based on verification later.
-            // No direct redirect here.
+            // No direct redirect here anymore, redirect happens after email is sent.
         })
         .catch((error) => {
             console.error("Signup Error:", error.code, error.message);
@@ -374,30 +396,14 @@ fbAuth.onAuthStateChanged((user) => {
     const currentPath = getCleanPath();
     console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
 
-    // Clear any previous verification messages
-    clearError('auth-message'); 
-    // Hide resend button initially
+    clearError('auth-message');
     const resendButton = document.getElementById('resend-verification-button');
     if (resendButton) resendButton.style.display = 'none';
 
-    // Check if we're on an auth page that doesn't require login
-    const isAuthPagePath = isAuthPage(currentPath);
-    const isSurveyPage = currentPath === '/survey' || currentPath === '/survey.html'; 
-    
-    // Check for strict auth token to enforce session-specific authentication
-    const hasAuthToken = !!sessionStorage.getItem(authTokenKey);
+    const hasAuthToken = !!sessionStorage.getItem(authTokenKey); // Keep strict token check
     console.log(`>>> Has strict auth token: ${hasAuthToken}`);
 
-    // SPECIAL CASE: If on login page and user is authenticated, ensure auth token is set
-    if (user && (currentPath === '/login' || currentPath === '/login.html') && !hasAuthToken) {
-        console.log('>>> Setting auth token for logged in user on login page');
-        sessionStorage.setItem(authTokenKey, Date.now().toString());
-    }
-
-    // Update has auth token after potential update
-    const finalHasAuthToken = !!sessionStorage.getItem(authTokenKey);
-    
-    if (user && finalHasAuthToken) {
+    if (user && hasAuthToken) {
         // User is authenticated AND has a valid token for this session
         console.log('>>> Auth state: STRICT_AUTHENTICATED');
         document.body.classList.add('logged-in');
@@ -405,96 +411,105 @@ fbAuth.onAuthStateChanged((user) => {
         // --- Check Email Verification FIRST ---
         if (!user.emailVerified) {
             console.log('>>> User email NOT verified.');
-            // Display persistent message
-            displayError('auth-message', 'Email address not verified. Please click the link in the verification email sent to you. If you just verified, try logging in again.'); 
-            // Show the resend button IF on the login page
-            if (currentPath === '/login' || currentPath === '/login.html' || currentPath === '/' && resendButton) {
-                resendButton.style.display = 'block'; 
+            displayError('auth-message', 'Email address not verified. Please click the link in the verification email sent to you. If you just verified, try logging in again.');
+
+            // Show resend button ONLY on verify-email page
+            if (currentPath === VERIFY_EMAIL_PATH && resendButton) {
+                resendButton.style.display = 'inline-block';
+            } else if (currentPath === LOGIN_PATH && resendButton) {
+                 // Also show on login page if they somehow land there unverified
+                 resendButton.style.display = 'inline-block';
             }
-            
-            // Redirect if necessary - only allow unverified users on specific pages
-            if (!isAuthPagePath) {
-                 console.log(`>>> Redirecting unverified user from ${currentPath} to /login.html`);
-                 window.location.href = '/login.html'; 
+
+            // If user is not verified, they should ONLY be on allowed pages
+            if (!isAllowedUnverifiedPage(currentPath)) {
+                 console.log(`>>> Redirecting unverified user from ${currentPath} to ${VERIFY_EMAIL_PATH}`);
+                 // Store the email again just in case it was lost
+                 if (user.email) sessionStorage.setItem('emailForVerification', user.email);
+                 window.location.href = VERIFY_EMAIL_PATH + '.html'; // Ensure .html extension
+            } else {
+                 console.log(`>>> Staying on allowed page for unverified user: ${currentPath}`);
             }
-            return; 
+            return; // Stop further processing for unverified user
         }
 
-        // --- Email is VERIFIED - Proceed with survey check ---
+        // --- Email is VERIFIED - Proceed ---
         console.log('>>> User email IS verified.');
-        // Hide resend button just in case it was visible
-        if (resendButton) resendButton.style.display = 'none'; 
+        if (resendButton) resendButton.style.display = 'none';
+
+        // If verified user is on verify-email page, redirect them away
+        if (currentPath === VERIFY_EMAIL_PATH) {
+            console.log(`>>> Verified user on verify page, redirecting to index`);
+             window.location.href = INDEX_PATH + '.html'; // Ensure .html extension
+             return;
+        }
+
+        // Now check survey status (only for verified users)
         const db = firebase.firestore();
         const userDocRef = db.collection('users').doc(user.uid);
-
         userDocRef.get().then((doc) => {
             const surveyDone = doc.exists && doc.data().surveyCompleted === true;
             console.log(`>>> Firestore check: surveyDone=${surveyDone}`);
 
             if (surveyDone) {
                 // Survey is completed.
-                if (isSurveyPage) {
-                    // Redirect away from survey page.
-                    console.log(`>>> Survey completed, redirecting verified user from survey page to /index.html`);
-                    window.location.href = '/index.html'; 
-                } else if (isAuthPagePath) {
-                    // Redirect away from login/signup page.
-                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+                if (currentPath === SURVEY_PATH) {
+                    console.log(`>>> Survey completed, redirecting verified user from survey page to ${INDEX_PATH}`);
+                    window.location.href = INDEX_PATH + '.html';
+                } else if (isPublicPage(currentPath) && currentPath !== VERIFY_EMAIL_PATH) { // Don't redirect from verify page here
+                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html');
                     sessionStorage.removeItem('redirectAfterLogin');
                     console.log(`>>> Survey completed, redirecting verified user from ${currentPath} to ${redirectUrl}`);
                     window.location.href = redirectUrl;
                 } else {
-                    // Survey completed, on a protected page. Do nothing.
                     console.log(`>>> Survey completed, staying on protected page: ${currentPath}`);
                 }
             } else {
-                // Survey NOT completed (or doc doesn't exist).
-                if (!isSurveyPage) {
-                    // Redirect TO survey page.
-                    console.log(`>>> Survey NOT completed, redirecting verified user from ${currentPath} to /survey.html`);
-                    sessionStorage.setItem('redirectAfterSurvey', isAuthPagePath ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
-                    sessionStorage.removeItem('redirectAfterLogin'); 
-                    window.location.href = '/survey.html';
+                // Survey NOT completed.
+                if (currentPath !== SURVEY_PATH) {
+                    console.log(`>>> Survey NOT completed, redirecting verified user from ${currentPath} to ${SURVEY_PATH}`);
+                    const intendedRedirect = isPublicPage(currentPath) ? (sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html')) : (window.location.pathname + window.location.search);
+                    sessionStorage.setItem('redirectAfterSurvey', intendedRedirect);
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    window.location.href = SURVEY_PATH + '.html';
                 } else {
-                     // Already ON survey page. Do nothing.
                     console.log(`>>> Survey NOT completed, staying on survey page.`);
                 }
             }
         }).catch((error) => {
-            console.error("Error checking survey status:", error);
-            // If we fail to check the survey status for a verified user,
-            // assume they haven't completed it.
-            if (!isSurveyPage) {
-                console.warn("Could not check survey status, redirecting verified user to survey page.");
-                 sessionStorage.setItem('redirectAfterSurvey', isAuthPagePath ? (sessionStorage.getItem('redirectAfterLogin') || '/index.html') : currentPath ); 
-                 sessionStorage.removeItem('redirectAfterLogin'); 
-                window.location.href = '/survey.html';
-            } else {
+             console.error("Error checking survey status:", error);
+             // Fallback: If survey check fails for a verified user, send them to the survey page
+             if (currentPath !== SURVEY_PATH) {
+                 console.warn("Could not check survey status, redirecting verified user to survey page.");
+                 const intendedRedirect = isPublicPage(currentPath) ? (sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html')) : (window.location.pathname + window.location.search);
+                 sessionStorage.setItem('redirectAfterSurvey', intendedRedirect);
+                 sessionStorage.removeItem('redirectAfterLogin');
+                 window.location.href = SURVEY_PATH + '.html';
+             } else {
                  console.warn("Could not check survey status, staying on survey page.");
-            }
+             }
         });
+
     } else {
-        // User is NOT properly authenticated
+        // User is NOT properly authenticated (no user OR no token)
         console.log('>>> Auth state: NOT_AUTHENTICATED');
         document.body.classList.remove('logged-in');
-        
-        // Don't clear the auth token if on login page - leave it for login function
-        if (!isAuthPagePath) {
+
+        // Clear the auth token unless on login page
+        if (currentPath !== LOGIN_PATH) {
             sessionStorage.removeItem(authTokenKey);
         }
 
-        // If NOT on an auth page, redirect TO login
-        if (!isAuthPagePath && !isSurveyPage) {
-            console.log(`>>> Redirecting unauthenticated user from ${currentPath} to /login.html`);
-            sessionStorage.setItem('redirectAfterLogin', currentPath + window.location.search);
-            window.location.href = '/login.html';
+        // If NOT on a public page, redirect TO login
+        if (!isPublicPage(currentPath) && currentPath !== SURVEY_PATH) { // Survey page handles its own auth redirect if needed
+            console.log(`>>> Redirecting unauthenticated user from ${currentPath} to ${LOGIN_PATH}`);
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search); // Use original path here
+            window.location.href = LOGIN_PATH + '.html';
         } else {
-            // User is NOT authenticated but on an auth/survey page - do nothing.
-            console.log(`>>> Staying on auth/survey page: ${currentPath}`);
+            console.log(`>>> Staying on public/survey page: ${currentPath}`);
         }
-        
-        // Hide resend button
-        if (resendButton) resendButton.style.display = 'none'; 
+
+        if (resendButton) resendButton.style.display = 'none';
     }
 });
 

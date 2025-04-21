@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <style>
+        .verify-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .verify-container h1 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+        .verify-container p {
+            margin-bottom: 25px;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        .verify-container .email-display {
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        .verify-container button {
+            padding: 12px 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+            text-decoration: none; /* For link-like behavior */
+            display: inline-block; /* For proper spacing */
+        }
+        .verify-container button:hover {
+            background: var(--primary-hover-color);
+        }
+        /* Style for the resend button */
+        #resend-verification-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+        #resend-verification-button:hover {
+             background: var(--cell-hover);
+        }
+        #resend-verification-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+         /* Message area styling */
+        #auth-message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .error-message { /* From styles.css, ensure it's defined */
+            color: var(--error-text, red);
+            background-color: var(--error-bg, #f8d7da);
+            border: 1px solid var(--error-border, #f5c6cb);
+            display: block; /* Make sure it takes space */
+            margin-bottom: 15px;
+        }
+        .success-message { /* Define success message style */
+             color: var(--success-text, green);
+             background-color: var(--success-bg, #d4edda);
+             border: 1px solid var(--success-border, #c3e6cb);
+             display: block; /* Make sure it takes space */
+             margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <h1>Check Your Email</h1>
+        <p>
+            We've sent a verification link to <strong id="user-email" class="email-display">your email</strong>. 
+            Please click the link in the email to verify your account. If you don't see it, check your spam folder.
+        </p>
+        <p>
+            Once verified, you can log in using the button below.
+        </p>
+        
+        <!-- Message area for resend status -->
+        <div id="auth-message" style="display: none;"></div> 
+        
+        <button onclick="window.location.href='/login.html'">Go to Login</button>
+        
+        <button id="resend-verification-button" style="display: none;">Resend Verification Email</button>
+    </div>
+
+    <!-- Firebase Init and Auth Logic -->
+    <script src="firebase-init.js"></script> 
+    <script src="auth.js"></script> 
+    <script>
+        // Display the email address and setup resend button
+        document.addEventListener('DOMContentLoaded', () => {
+            const emailDisplay = document.getElementById('user-email');
+            const storedEmail = sessionStorage.getItem('emailForVerification');
+            if (emailDisplay && storedEmail) {
+                emailDisplay.textContent = storedEmail;
+            } else if (emailDisplay) {
+                 emailDisplay.textContent = 'the address you provided'; // Fallback
+            }
+
+            const resendButton = document.getElementById('resend-verification-button');
+            const authMessage = document.getElementById('auth-message');
+            
+            // Only show resend button if user is still technically logged in but unverified
+             firebase.auth().onAuthStateChanged(user => {
+                 if (user && !user.emailVerified) {
+                     if(resendButton) resendButton.style.display = 'inline-block';
+                     // Re-attach listener needed here because auth.js might run after DOMContentLoaded
+                      if (resendButton && typeof handleResendVerificationEmail === 'function') {
+                          resendButton.addEventListener('click', handleResendVerificationEmail);
+                      }
+                      // Ensure auth message display works correctly on this page
+                      window.displayError = function(elementId, message) { // Make displayError global temporarily
+                           const errorElement = document.getElementById(elementId);
+                           if (errorElement) {
+                               errorElement.textContent = message;
+                               errorElement.style.display = 'block';
+                               // Add appropriate class for styling
+                               errorElement.className = message.includes('Failed') ? 'error-message' : 'success-message';
+                           }
+                       };
+                 } else if (resendButton) {
+                     resendButton.style.display = 'none';
+                 }
+             });
+        });
+    </script>
+    <script src="theme.js"></script>
+</body>
+</html> 
