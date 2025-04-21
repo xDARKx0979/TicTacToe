@@ -294,7 +294,7 @@ h2 {
     margin-top: 20px;
 }
 
-/* Default styles for ALL buttons */
+/* Default styles for ALL standard buttons */
 button {
     padding: 10px 20px;
     background-color: var(--button-bg); /* Use theme-based background */
@@ -304,6 +304,9 @@ button {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    /* Ensure buttons don't have extra inherited styles */
+    font-weight: normal; 
+    text-decoration: none;
 }
 
 button:hover {
@@ -316,6 +319,7 @@ button:disabled {
     color: var(--text-light); /* Lighter text for disabled */
     cursor: not-allowed;
     opacity: 0.7;
+    border-color: var(--border-color);
 }
 
 /* Override for Primary Action Buttons (e.g., Login, Signup) */
@@ -324,8 +328,8 @@ button:disabled {
 button.primary-action /* Add this class to other primary buttons if needed */
 {
     background: var(--primary-color);
-    color: white; /* Force white text for primary buttons */
-    border: none; /* Primary buttons often don't need a border */
+    color: white !important; /* Force white text for primary buttons */
+    border: none;
     font-weight: bold;
 }
 
@@ -340,7 +344,7 @@ button.primary-action:hover
 .back-button {
     padding: 10px 20px;
     background-color: #f44336;
-    color: white;
+    color: white !important; /* Force white text */
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -351,6 +355,7 @@ button.primary-action:hover
 
 .back-button:hover {
     background-color: #d32f2f;
+    border: none;
 }
 
 /* Specific Buttons - Ensuring they inherit correctly or have minimal overrides */
@@ -368,7 +373,7 @@ button.primary-action:hover
     top: 15px;
     right: 180px; 
     background-color: #dc3545; /* Red color for logout */
-    color: white; /* Force white text */
+    color: white !important; /* Force white text */
     padding: 8px 15px;
     border-radius: 20px;
     font-weight: bold;
@@ -394,6 +399,30 @@ button.primary-action:hover
     margin-right: 8px;
     height: 18px;
     width: 18px;
+}
+
+/* Verify Email Page Button - Ensure it uses default styling */
+.verify-container button {
+     /* Inherits default button styling */
+     /* Ensure primary color isn't overriding */
+     background-color: var(--button-bg);
+     color: var(--button-text);
+     border: 1px solid var(--border-color);
+     font-weight: normal; /* Override bold if inherited */
+     padding: 12px 25px; /* Keep specific padding */
+}
+
+.verify-container button:hover {
+     background-color: var(--cell-hover);
+     border-color: var(--text-light);
+}
+
+/* Override for the resend button on verify page */
+.verify-container #resend-verification-button {
+    margin-top: 15px;
+    padding: 10px 20px; /* Keep specific padding */
+    font-size: 14px;
+     /* background-color, color, border inherited from default button */
 }
 
 /* Remove the specific signup button color rules as they are handled by .auth-form button */

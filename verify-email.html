@@ -95,13 +95,13 @@
             Please click the link in the email to verify your account. If you don't see it, check your spam folder.
         </p>
         <p>
-            Once verified, you can log in using the button below.
+            Once you've clicked the link in your email, press the button below to continue.
         </p>
         
-        <!-- Message area for resend status -->
+        <!-- Message area for status -->
         <div id="auth-message" style="display: none;"></div> 
         
-        <button onclick="window.location.href='/login.html'">Go to Login</button>
+        <button id="check-verification-button">Check Verification & Proceed</button>
         
         <button id="resend-verification-button" style="display: none;">Resend Verification Email</button>
     </div>
@@ -110,7 +110,7 @@
     <script src="firebase-init.js"></script> 
     <script src="auth.js"></script> 
     <script>
-        // Display the email address and setup resend button
+        // Display the email address and setup listeners
         document.addEventListener('DOMContentLoaded', () => {
             const emailDisplay = document.getElementById('user-email');
             const storedEmail = sessionStorage.getItem('emailForVerification');
@@ -121,24 +121,70 @@
             }
 
             const resendButton = document.getElementById('resend-verification-button');
+            const checkButton = document.getElementById('check-verification-button');
             const authMessage = document.getElementById('auth-message');
             
-            // Only show resend button if user is still technically logged in but unverified
+            // Helper to display messages on this page
+            const displayVerificationMessage = (message, isError) => {
+                authMessage.textContent = message;
+                authMessage.className = isError ? 'error-message' : 'success-message';
+                authMessage.style.display = 'block';
+            };
+            
+            // Listener for the main check button
+            if (checkButton) {
+                checkButton.addEventListener('click', () => {
+                    console.log('Check Verification button clicked');
+                    displayVerificationMessage('Checking verification status...', false);
+                    checkButton.disabled = true;
+                    
+                    const currentUser = firebase.auth().currentUser;
+                    
+                    if (!currentUser) {
+                        displayVerificationMessage('Error: Could not find user session. Please try logging in again.', true);
+                        checkButton.disabled = false;
+                        // Optionally redirect to login after delay
+                        // setTimeout(() => { window.location.href = '/login.html'; }, 3000);
+                        return;
+                    }
+                    
+                    // Force reload user profile
+                    currentUser.reload().then(() => {
+                        console.log('User profile reloaded. Email verified:', currentUser.emailVerified);
+                        if (currentUser.emailVerified) {
+                            displayVerificationMessage('Email verified successfully! Redirecting...', false);
+                            // Set the auth token for the new session
+                            sessionStorage.setItem('strict_auth_token', Date.now().toString());
+                            // Redirect to index page (or intended destination if stored)
+                            const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+                            sessionStorage.removeItem('redirectAfterLogin'); 
+                            sessionStorage.removeItem('emailForVerification');
+                            window.location.href = redirectUrl; 
+                        } else {
+                            displayVerificationMessage('Email not verified yet. Please click the link in the email first.', true);
+                            checkButton.disabled = false; // Re-enable button
+                        }
+                    }).catch(error => {
+                        console.error('Error reloading user profile:', error);
+                        displayVerificationMessage(`Error checking status: ${error.message}. Please try again.`, true);
+                        checkButton.disabled = false;
+                    });
+                });
+            }
+            
+            // Setup resend button visibility and listener
              firebase.auth().onAuthStateChanged(user => {
                  if (user && !user.emailVerified) {
                      if(resendButton) resendButton.style.display = 'inline-block';
-                     // Re-attach listener needed here because auth.js might run after DOMContentLoaded
                       if (resendButton && typeof handleResendVerificationEmail === 'function') {
+                          resendButton.removeEventListener('click', handleResendVerificationEmail); // Remove potential old listener
                           resendButton.addEventListener('click', handleResendVerificationEmail);
                       }
-                      // Ensure auth message display works correctly on this page
-                      window.displayError = function(elementId, message) { // Make displayError global temporarily
-                           const errorElement = document.getElementById(elementId);
-                           if (errorElement) {
-                               errorElement.textContent = message;
-                               errorElement.style.display = 'block';
-                               // Add appropriate class for styling
-                               errorElement.className = message.includes('Failed') ? 'error-message' : 'success-message';
+                      // Ensure auth message display works correctly from auth.js too
+                      window.displayError = function(elementId, message) { 
+                           const msgElement = document.getElementById(elementId);
+                           if (msgElement) {
+                               displayVerificationMessage(message, !message.includes('sent')); // Assume error unless message indicates success
                            }
                        };
                  } else if (resendButton) {
