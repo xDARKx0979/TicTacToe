@@ -238,19 +238,22 @@ function handleLogin(event) {
     // Set the strict auth token BEFORE login to ensure it's available
     // when the auth state changes
     sessionStorage.setItem(authTokenKey, Date.now().toString());
-    console.log('Auth token set to:', sessionStorage.getItem(authTokenKey));
+    console.log('Auth token set before login attempt:', sessionStorage.getItem(authTokenKey));
 
     fbAuth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            // Signed in - DO NOT REDIRECT YET
-            // onAuthStateChanged will handle checking survey and redirecting.
-            console.log("User login API call successful, waiting for auth state change:", userCredential.user);
-            
-            // Double-check token is set
-            if (!sessionStorage.getItem(authTokenKey)) {
-                sessionStorage.setItem(authTokenKey, Date.now().toString());
-                console.log('Auth token re-set after login');
-            }
+            // Signed in - RELOAD user profile to get latest emailVerified status
+            console.log("User signed in via API, reloading profile...");
+            return userCredential.user.reload().then(() => {
+                console.log("User profile reloaded. emailVerified:", userCredential.user.emailVerified);
+                // Now let onAuthStateChanged handle the state change with the updated profile.
+                 console.log("User login API call successful, refreshed state, waiting for auth state change handler...");
+                 // Double-check token is set (should be, but good practice)
+                 if (!sessionStorage.getItem(authTokenKey)) {
+                     sessionStorage.setItem(authTokenKey, Date.now().toString());
+                     console.log('Auth token re-set after login just in case');
+                 }
+            });
         })
         .catch((error) => {
             // Clear token if login fails
