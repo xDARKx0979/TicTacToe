@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOM (WebAssembly)</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* Allow stacking back button and iframe */
+            justify-content: flex-start; /* Align to top */
+            align-items: stretch; /* Stretch items */
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent body scrollbars */
+            background-color: #000; /* Black background might look better */
+        }
+        .back-button {
+            position: static; /* Override fixed positioning */
+            margin: 10px;
+            align-self: flex-start; 
+            z-index: 10; /* Ensure it's above iframe */
+        }
+        .game-frame-container {
+            flex-grow: 1; 
+            display: flex; 
+            padding: 0 10px 10px 10px; 
+            box-sizing: border-box;
+        }
+        #game-frame {
+            flex-grow: 1; 
+            border: none; /* No border needed for external site */
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+    <div class="game-frame-container">
+        <!-- Embed the external WASM Doom instance -->
+        <iframe id="game-frame" src="https://midzer.de/wasm/doom/" frameborder="0"></iframe>
+    </div>
+
+    <!-- Firebase Init and Auth Logic - Keep for consistency -->
+    <script src="firebase-init.js"></script> 
+    <script src="auth.js"></script> 
+</body>
+</html> 
