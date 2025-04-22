@@ -894,4 +894,34 @@ body.admin-chat-page { /* Add this class to admin body tag */
     padding: 50px 20px;
     color: var(--text-secondary);
     margin: auto; /* Center vertically and horizontally in flex container */
+}
+
+/* New Fixed Chat Button */
+.chat-button-fixed {
+    position: fixed;
+    top: 63px; /* Positioned below support button (15px top + ~38px height + 10px gap) */
+    right: 15px;
+    background-color: var(--primary-color); /* Match theme's primary color */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1000; /* Ensure it's above other content */
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.chat-button-fixed:hover {
+    background-color: var(--primary-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.chat-button-fixed svg {
+    margin-right: 8px; /* Space between icon and text */
+    /* width/height set inline in HTML for this specific icon */
 } 
