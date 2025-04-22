@@ -1,33 +1,13 @@
-/* Theme Variables */
+/* Theme Variables - Dark Mode is now Default */
 :root {
-    /* Light Theme (Default) */
-    --background-color: #f4f4f4;
-    --container-bg: white;
-    --text-color: #333;
-    --text-secondary: #666;
-    --border-color: #ddd;
-    --button-bg: #f8f8f8;
-    --button-hover: #3e8e41;
-    --cell-bg: #e0e0e0;
-    --cell-hover: #d0d0d0;
-    --info-bg: #f0f0f0;
-    --floating-score-bg: rgba(0, 0, 0, 0.7);
-    --floating-score-text: white;
-    --floating-score-value: #4CAF50;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --x-color: #2196F3;
-    --o-color: #F44336;
-}
-
-/* Dark Theme */
-[data-theme="dark"] {
     --background-color: #121212;
     --container-bg: #1e1e1e;
     --text-color: #e0e0e0;
     --text-secondary: #b0b0b0;
     --border-color: #444;
-    --button-bg: #2e2e2e;
-    --button-hover: #388e3c;
+    --button-bg: #2e2e2e; 
+    --button-text: #e0e0e0; /* Default button text for dark mode */
+    --button-hover: #388e3c; /* Example hover, adjust if needed */
     --cell-bg: #383838;
     --cell-hover: #505050;
     --info-bg: #2a2a2a;
@@ -37,36 +17,17 @@
     --shadow-color: rgba(0, 0, 0, 0.3);
     --x-color: #42a5f5;
     --o-color: #ef5350;
-}
-
-/* Theme toggle styles */
-.theme-toggle {
-    position: fixed;
-    top: 60px;
-    right: 15px;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.theme-toggle-icon {
-    height: 24px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--text-color);
-    background-color: var(--button-bg);
-    border-radius: 50%;
-    padding: 4px;
-    box-shadow: 0 0 5px var(--shadow-color);
-}
-
-.theme-toggle-text {
-    margin-right: 8px;
-    font-size: 14px;
-    color: var(--text-color);
+    --input-bg: #333; /* Added from previous dark mode styles */
+    --primary-color: #3498db; /* Added from previous dark mode styles */
+    --primary-hover-color: #217dbb; /* Added from previous dark mode styles */
+    --link-color: #3498db; /* Added from previous dark mode styles */
+    --frame-color: #555; /* Added from previous dark mode styles */
+    --error-text: #f8d7da; /* Added from previous dark mode styles */
+    --error-bg: #721c24; /* Added from previous dark mode styles */
+    --error-border: #f5c6cb; /* Added from previous dark mode styles */
+    --success-text: #d4edda; /* Added from previous dark mode styles */
+    --success-bg: #155724; /* Added from previous dark mode styles */
+    --success-border: #c3e6cb; /* Added from previous dark mode styles */
 }
 
 /* Apply theme variables to existing styles */
@@ -82,7 +43,7 @@ body {
     padding: 0;
     background-color: var(--background-color);
     color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
+    /* Remove transition as theme doesn't change */
     line-height: 1.6;
     /* Restore flex properties for centering */
     display: flex;
@@ -97,7 +58,7 @@ body {
     box-shadow: 0 0 10px var(--shadow-color);
     padding: 30px;
     text-align: center;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Remove transition */
 }
 
 h1 {
@@ -579,7 +540,7 @@ body {
     padding: 0;
     background-color: var(--background-color);
     color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
+    /* Remove transition as theme doesn't change */
     line-height: 1.6;
     /* Restore flex properties for centering */
     display: flex;
