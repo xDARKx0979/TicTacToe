@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOM</title>
+    <link rel="stylesheet" href="styles.css"> 
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* Allow stacking back button and iframe */
+            justify-content: flex-start; /* Align to top */
+            align-items: stretch; /* Stretch items */
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent body scrollbars */
+        }
+        .back-button {
+            position: static; /* Override fixed positioning */
+            margin: 10px; /* Add some margin */
+            align-self: flex-start; /* Keep it to the left */
+        }
+        .game-frame-container {
+            flex-grow: 1; /* Allow container to take remaining space */
+            display: flex; /* Use flex for iframe */
+            padding: 0 10px 10px 10px; /* Padding around iframe */
+            box-sizing: border-box;
+        }
+        #game-frame {
+            flex-grow: 1; /* Allow iframe to fill container */
+            border: 2px solid var(--frame-color, #555); /* Use variable or default */
+            border-radius: 5px;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Games</a>
+    <div class="game-frame-container">
+        <iframe id="game-frame" src="jsdoom-master/index.html" frameborder="0"></iframe>
+    </div>
+
+    <!-- Firebase Init and Auth Logic (Might not be needed for game itself, but include for consistency) -->
+    <script src="firebase-init.js"></script> 
+    <script src="auth.js"></script> 
+</body>
+</html> 
