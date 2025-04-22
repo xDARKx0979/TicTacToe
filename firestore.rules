@@ -9,6 +9,31 @@ service cloud.firestore {
       // Or maybe store user profile info like display name?
     }
 
+    // Chat Sessions: Store metadata about chats
+    match /chat_sessions/{userId} {
+       // Allow user to create their session info initially
+       allow create: if request.auth != null && request.auth.uid == userId;
+       // Allow user and admin to update (e.g., last message timestamp)
+       allow update: if request.auth != null && 
+                     (request.auth.uid == userId || request.auth.uid == 'II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2');
+       // Allow admin to read all sessions for the list view
+       allow read: if request.auth != null && request.auth.uid == 'II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2';
+    }
+    
+    // Chat Messages: Store actual messages within a user's chat
+    match /chats/{userId}/messages/{messageId} {
+      // Allow user to read/write messages in their own chat
+      // Allow admin to read/write messages in ANY chat
+      allow read, write: if request.auth != null && 
+                           (request.auth.uid == userId || request.auth.uid == 'II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2');
+      
+      // Optional: Add validation for message content/structure
+      // allow write: if request.resource.data.text is string && 
+      //                 request.resource.data.timestamp == request.time &&
+      //                 request.resource.data.senderId == request.auth.uid &&
+      //                 request.resource.data.keys().hasOnly(['text', 'timestamp', 'senderId', 'senderEmail', 'isAdmin']); 
+    }
+
     // REMOVED Survey Results rules
     /* 
     match /surveyResults/aggregate {

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Developer</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <style>
+        .chat-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: var(--container-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 70vh; /* Adjust height as needed */
+        }
+        #chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column; /* Stack messages */
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            line-height: 1.4;
+        }
+        .message .sender {
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        .user-message {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end; /* Align user messages to the right */
+            border-bottom-right-radius: 5px;
+        }
+        .dev-message {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            align-self: flex-start; /* Align dev messages to the left */
+            border-bottom-left-radius: 5px;
+        }
+         .dev-message .sender {
+             color: var(--text-light); /* Lighter sender name for dev */
+         }
+        #chat-input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        #chat-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            margin-right: 10px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        #send-button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+         #send-button:hover {
+             background-color: var(--primary-hover-color);
+         }
+        .loading, .error {
+             text-align: center;
+             padding: 20px;
+             color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button" style="position: fixed; top: 15px; left: 15px; z-index: 1001;">← Back to Games</a>
+    
+    <div class="chat-container">
+        <div id="chat-messages">
+            <div class="loading">Loading chat...</div>
+            <!-- Messages will be loaded here -->
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <!-- Firebase Init and Auth Logic -->
+    <script src="firebase-init.js"></script> 
+    <script src="auth.js"></script> 
+    <script src="chat-user.js"></script> <!-- Link to the user chat JS -->
+
+</body>
+</html> 

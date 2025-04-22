@@ -70,7 +70,8 @@ function getCleanPath() {
     if (path.endsWith('.html')) {
          path = path.slice(0, -5);
     }
-    if (path === '') path = '/index'; // Treat root as index
+    // Handle case where path is empty after removing .html (e.g., /index.html -> /index)
+    if (path === '') path = '/index'; 
     return path;
 }
 
@@ -78,13 +79,16 @@ const LOGIN_PATH = '/login';
 const SIGNUP_PATH = '/signup';
 const RESET_PATH = '/reset-password';
 const VERIFY_EMAIL_PATH = '/verify-email';
-const SURVEY_PATH = '/survey';
+// const SURVEY_PATH = '/survey'; // Removed
 const INDEX_PATH = '/index';
+const ADMIN_CHAT_PATH = '/chat-admin'; // New Admin Chat Path
+const USER_CHAT_PATH = '/chat-user'; // New User Chat Path
 
 // Pages that DO NOT require the user to be authenticated
 const PUBLIC_PAGES = [LOGIN_PATH, SIGNUP_PATH, RESET_PATH, VERIFY_EMAIL_PATH];
 
 // Pages that DO NOT require the user's email to be verified
+// Note: Admin chat might need verification depending on requirements, but user chat definitely does.
 const ALLOWED_UNVERIFIED_PAGES = [LOGIN_PATH, SIGNUP_PATH, RESET_PATH, VERIFY_EMAIL_PATH];
 
 function isPublicPage(path) {
@@ -405,14 +409,24 @@ fbAuth.onAuthStateChanged((user) => {
 
     const hasAuthToken = !!sessionStorage.getItem(authTokenKey); // Keep strict token check
     console.log(`>>> Has strict auth token: ${hasAuthToken}`);
+    
+    // Admin UID for special access (replace with your actual admin UID)
+    const ADMIN_UID = "II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2"; 
 
     if (user && hasAuthToken) {
         // User is authenticated AND has a valid token for this session
         console.log('>>> Auth state: STRICT_AUTHENTICATED');
         document.body.classList.add('logged-in');
 
-        // --- Check Email Verification FIRST ---
-        if (!user.emailVerified) {
+        // --- Admin Check for Admin Page ---
+        if (currentPath === ADMIN_CHAT_PATH && user.uid !== ADMIN_UID) {
+             console.warn(`🚫 Unauthorized access attempt to admin chat by UID: ${user.uid}`);
+             window.location.href = INDEX_PATH + '.html'; // Redirect non-admins away
+             return;
+        }
+
+        // --- Check Email Verification FIRST (unless admin on admin page) ---
+        if (!user.emailVerified && !(currentPath === ADMIN_CHAT_PATH && user.uid === ADMIN_UID)) {
             console.log('>>> User email NOT verified.');
             displayError('auth-message', 'Email address not verified. Please click the link in the verification email sent to you. If you just verified, try logging in again.');
 
@@ -427,28 +441,28 @@ fbAuth.onAuthStateChanged((user) => {
             // If user is not verified, they should ONLY be on allowed pages
             if (!isAllowedUnverifiedPage(currentPath)) {
                  console.log(`>>> Redirecting unverified user from ${currentPath} to ${VERIFY_EMAIL_PATH}`);
-                 // Store the email again just in case it was lost
                  if (user.email) sessionStorage.setItem('emailForVerification', user.email);
-                 window.location.href = VERIFY_EMAIL_PATH + '.html'; // Ensure .html extension
-            } else {
+                 window.location.href = VERIFY_EMAIL_PATH + '.html';
+             } else {
                  console.log(`>>> Staying on allowed page for unverified user: ${currentPath}`);
-            }
-            return; // Stop further processing for unverified user
+             }
+             return; 
         }
 
-        // --- Email is VERIFIED - Proceed ---
-        console.log('>>> User email IS verified.');
+        // --- Email is VERIFIED (or Admin on Admin Page) - Proceed ---
+        console.log('>>> User email IS verified (or admin bypass).');
         if (resendButton) resendButton.style.display = 'none';
 
         // If verified user is on verify-email page, redirect them away
         if (currentPath === VERIFY_EMAIL_PATH) {
             console.log(`>>> Verified user on verify page, redirecting to index`);
-             window.location.href = INDEX_PATH + '.html'; // Ensure .html extension
+             window.location.href = INDEX_PATH + '.html';
              return;
         }
         
-        // If verified user is on any public page (login, signup, reset), redirect to index
-        if (isPublicPage(currentPath)) {
+        // If verified user is on any other public page (login, signup, reset), redirect to index
+        // Exception: Admin on admin page is okay.
+        if (isPublicPage(currentPath) && !(currentPath === ADMIN_CHAT_PATH && user.uid === ADMIN_UID)) {
              console.log(`>>> Verified user on public page ${currentPath}, redirecting to index`);
              const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html');
              sessionStorage.removeItem('redirectAfterLogin');
@@ -456,9 +470,8 @@ fbAuth.onAuthStateChanged((user) => {
              return;
         }
 
-        // Verified user on a protected page (not verify-email or other public pages)
-        // No further action needed, allow access.
-        console.log(`>>> Verified user staying on protected page: ${currentPath}`);
+        // Verified user is on a protected page (index, game, user chat, or admin on admin chat)
+        console.log(`>>> Verified user staying on page: ${currentPath}`);
 
     } else {
         // User is NOT properly authenticated (no user OR no token)
@@ -471,9 +484,9 @@ fbAuth.onAuthStateChanged((user) => {
         }
 
         // If NOT on a public page, redirect TO login
-        if (!isPublicPage(currentPath)) { 
+        if (!isPublicPage(currentPath)) {
             console.log(`>>> Redirecting unauthenticated user from ${currentPath} to ${LOGIN_PATH}`);
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search); // Use original path here
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
             window.location.href = LOGIN_PATH + '.html';
         } else {
             console.log(`>>> Staying on public page: ${currentPath}`);
