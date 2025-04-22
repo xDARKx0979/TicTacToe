@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let unsubscribe = null; // To stop listening when needed
     const db = firebase.firestore();
+    const ADMIN_UID = "II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2"; // Ensure this matches your admin UID
 
     // Scroll to the bottom of the chat messages
     const scrollToBottom = () => {
@@ -110,6 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Authentication check
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
+            // --- ADMIN CHECK --- 
+            // If the logged-in user is the admin, redirect them away from user chat page
+            if (user.uid === ADMIN_UID) {
+                console.log("Admin detected on user chat page. Redirecting to admin chat.");
+                window.location.replace('/chat-admin.html'); // Use replace to avoid history entry
+                return; // Stop further execution for admin on this page
+            }
+            // --- END ADMIN CHECK ---
+            
+            // If not admin, proceed as normal user
             console.log('User authenticated for chat:', user.uid);
             currentUser = user;
             // Ensure Firestore is ready (sometimes a slight delay is needed)
