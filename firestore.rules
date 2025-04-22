@@ -5,15 +5,17 @@ service cloud.firestore {
     // User Profiles: Allow users to read/write their own profile only.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Note: Consider if you need other fields here, like isAdmin? 
+      // Or maybe store user profile info like display name?
     }
 
-    // Survey Results: 
-    // - Allow ANY authenticated user to update/create (when submitting survey).
-    // - Allow ONLY the specific admin UID to read the results.
+    // REMOVED Survey Results rules
+    /* 
     match /surveyResults/aggregate {
       allow read: if request.auth != null && request.auth.uid == 'II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2'; // <<< RESTRICT READ TO ADMIN UID
       allow update: if request.auth != null; // Any logged-in user can increment
       allow create: if request.auth != null && !exists(/databases/$(database)/documents/surveyResults/aggregate); // Can be created by first voter
     }
+    */
   }
 } 

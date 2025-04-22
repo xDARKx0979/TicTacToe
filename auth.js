@@ -446,52 +446,19 @@ fbAuth.onAuthStateChanged((user) => {
              window.location.href = INDEX_PATH + '.html'; // Ensure .html extension
              return;
         }
+        
+        // If verified user is on any public page (login, signup, reset), redirect to index
+        if (isPublicPage(currentPath)) {
+             console.log(`>>> Verified user on public page ${currentPath}, redirecting to index`);
+             const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html');
+             sessionStorage.removeItem('redirectAfterLogin');
+             window.location.href = redirectUrl;
+             return;
+        }
 
-        // Now check survey status (only for verified users)
-        const db = firebase.firestore();
-        const userDocRef = db.collection('users').doc(user.uid);
-        userDocRef.get().then((doc) => {
-            const surveyDone = doc.exists && doc.data().surveyCompleted === true;
-            console.log(`>>> Firestore check: surveyDone=${surveyDone}`);
-
-            if (surveyDone) {
-                // Survey is completed.
-                if (currentPath === SURVEY_PATH) {
-                    console.log(`>>> Survey completed, redirecting verified user from survey page to ${INDEX_PATH}`);
-                    window.location.href = INDEX_PATH + '.html';
-                } else if (isPublicPage(currentPath) && currentPath !== VERIFY_EMAIL_PATH) { // Don't redirect from verify page here
-                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html');
-                    sessionStorage.removeItem('redirectAfterLogin');
-                    console.log(`>>> Survey completed, redirecting verified user from ${currentPath} to ${redirectUrl}`);
-                    window.location.href = redirectUrl;
-                } else {
-                    console.log(`>>> Survey completed, staying on protected page: ${currentPath}`);
-                }
-            } else {
-                // Survey NOT completed.
-                if (currentPath !== SURVEY_PATH) {
-                    console.log(`>>> Survey NOT completed, redirecting verified user from ${currentPath} to ${SURVEY_PATH}`);
-                    const intendedRedirect = isPublicPage(currentPath) ? (sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html')) : (window.location.pathname + window.location.search);
-                    sessionStorage.setItem('redirectAfterSurvey', intendedRedirect);
-                    sessionStorage.removeItem('redirectAfterLogin');
-                    window.location.href = SURVEY_PATH + '.html';
-                } else {
-                    console.log(`>>> Survey NOT completed, staying on survey page.`);
-                }
-            }
-        }).catch((error) => {
-             console.error("Error checking survey status:", error);
-             // Fallback: If survey check fails for a verified user, send them to the survey page
-             if (currentPath !== SURVEY_PATH) {
-                 console.warn("Could not check survey status, redirecting verified user to survey page.");
-                 const intendedRedirect = isPublicPage(currentPath) ? (sessionStorage.getItem('redirectAfterLogin') || (INDEX_PATH + '.html')) : (window.location.pathname + window.location.search);
-                 sessionStorage.setItem('redirectAfterSurvey', intendedRedirect);
-                 sessionStorage.removeItem('redirectAfterLogin');
-                 window.location.href = SURVEY_PATH + '.html';
-             } else {
-                 console.warn("Could not check survey status, staying on survey page.");
-             }
-        });
+        // Verified user on a protected page (not verify-email or other public pages)
+        // No further action needed, allow access.
+        console.log(`>>> Verified user staying on protected page: ${currentPath}`);
 
     } else {
         // User is NOT properly authenticated (no user OR no token)
@@ -504,12 +471,12 @@ fbAuth.onAuthStateChanged((user) => {
         }
 
         // If NOT on a public page, redirect TO login
-        if (!isPublicPage(currentPath) && currentPath !== SURVEY_PATH) { // Survey page handles its own auth redirect if needed
+        if (!isPublicPage(currentPath)) { 
             console.log(`>>> Redirecting unauthenticated user from ${currentPath} to ${LOGIN_PATH}`);
             sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search); // Use original path here
             window.location.href = LOGIN_PATH + '.html';
         } else {
-            console.log(`>>> Staying on public/survey page: ${currentPath}`);
+            console.log(`>>> Staying on public page: ${currentPath}`);
         }
 
         if (resendButton) resendButton.style.display = 'none';
