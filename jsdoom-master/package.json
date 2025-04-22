@@ -1,0 +1,34 @@
+{
+    "name": "jsdoom",
+    "version": "0.6.0",
+    "description": "Doom in the browser.",
+    "keywords": [
+        "Doom",
+        "Wolfenstein",
+        "FPS"
+    ],
+    "homepage": "https://github.com/yvesgurcan/jsdoom",
+    "bugs": {
+        "url": "https://github.com/yvesgurcan/jsdoom/issues"
+    },
+    "author": {
+        "name": "Yves Gurcan",
+        "email": "ygurcan@cbtnuggets.com",
+        "url": "http://www.yvesgurcan.com"
+    },
+    "scripts": {
+        "start": "webpack-dev-server",
+        "lint": "prettier --write 'src/**/*.js'"
+    },
+    "devDependencies": {
+        "clean-webpack-plugin": "^3.0.0",
+        "html-webpack-plugin": "^3.2.0",
+        "prettier": "^1.19.1",
+        "redux": "^4.0.0",
+        "uuid4": "^1.0.0",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10",
+        "webpack-dev-server": "^3.9.0",
+        "workbox-webpack-plugin": "^4.3.1"
+    }
+}
