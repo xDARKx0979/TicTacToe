@@ -405,27 +405,38 @@ function showToastNotification(message) {
     
     // Create element if it doesn't exist
     if (!toastElement) {
+        console.log('[Toast] Creating toast element');
         toastElement = document.createElement('div');
         toastElement.id = 'toast-notification';
         document.body.appendChild(toastElement);
+    } else {
+        console.log('[Toast] Found existing toast element');
     }
     
-    toastElement.textContent = "New message from Dev: " + message.substring(0, 100) + (message.length > 100 ? '...' : ''); // Limit length
+    const truncatedMessage = message.substring(0, 100) + (message.length > 100 ? '...' : '');
+    console.log(`[Toast] Setting text: New message from Dev: ${truncatedMessage}`);
+    toastElement.textContent = "New message from Dev: " + truncatedMessage;
+    
+    console.log('[Toast] Adding show class');
     toastElement.classList.add('show');
     
     // Clear any existing timeout to reset timer
     if (toastTimeout) {
+        console.log('[Toast] Clearing existing timeout');
         clearTimeout(toastTimeout);
     }
     
     // Auto-hide after 5 seconds
+    console.log('[Toast] Setting timeout for hiding');
     toastTimeout = setTimeout(() => {
+        console.log('[Toast] Hiding toast via timeout');
         toastElement.classList.remove('show');
         toastTimeout = null; // Clear the timeout reference
     }, 5000); 
     
     // Optional: Allow clicking to dismiss
     toastElement.onclick = () => {
+        console.log('[Toast] Hiding toast via click');
         toastElement.classList.remove('show');
         if (toastTimeout) clearTimeout(toastTimeout);
         toastTimeout = null;
@@ -521,7 +532,7 @@ fbAuth.onAuthStateChanged((user) => {
 
         // --- Setup Notification Listener for Verified Users --- 
         if (user.uid && !unsubscribeNotifications) { // Check UID exists and listener not already set
-            console.log(`Setting up notification listener for user ${user.uid}`);
+            console.log(`[Notifications] Setting up listener for user ${user.uid}`);
             const db = firebase.firestore(); // Ensure db is accessible here
             const messagesRef = db.collection('chats').doc(user.uid).collection('messages');
             
@@ -530,30 +541,42 @@ fbAuth.onAuthStateChanged((user) => {
                 .orderBy('timestamp', 'desc') // Order by timestamp to potentially limit initial load (optional)
                 .limit(10) // Limit initial snapshot check to recent messages (optional)
                 .onSnapshot(snapshot => {
-                    console.log("Notification listener snapshot received");
+                    console.log(`[Notifications] Snapshot received. Metadata: pending=${snapshot.metadata.hasPendingWrites}`);
                     snapshot.docChanges().forEach(change => {
+                        console.log(`[Notifications] Change detected: type=${change.type}, docId=${change.doc.id}`);
                         // Only act on newly added messages after initial sync
-                        if (change.type === 'added' && !snapshot.metadata.hasPendingWrites) { 
-                             // Check if the message timestamp is recent enough (e.g., within last minute) 
-                            // This helps prevent showing old notifications on page reloads/reconnects
-                            const messageData = change.doc.data();
-                            const messageTime = messageData.timestamp?.toDate(); // Get timestamp as Date
-                            const now = new Date();
-                            
-                            if (messageTime && (now.getTime() - messageTime.getTime()) < 60000) { // Check if within last 60 seconds
-                                console.log("New admin message detected for notification:", messageData.text);
+                        // TEMPORARILY REMOVED hasPendingWrites check for easier debugging
+                        // if (change.type === 'added' && !snapshot.metadata.hasPendingWrites) { 
+                        if (change.type === 'added') { 
+                             const messageData = change.doc.data();
+                             console.log("[Notifications] Added message data:", messageData);
+                             const messageTime = messageData.timestamp?.toDate(); // Get timestamp as Date
+                             const now = new Date();
+                             const isRecent = messageTime && (now.getTime() - messageTime.getTime()) < 60000; // Check if within last 60 seconds
+                             console.log(`[Notifications] Message time: ${messageTime}, Is recent: ${isRecent}`);
+
+                            // TEMPORARILY REMOVED timestamp check for easier debugging
+                            // if (messageTime && (now.getTime() - messageTime.getTime()) < 60000) { 
+                            if (true) { // Always try to show for now
+                                const isOnChatPage = getCleanPath() === USER_CHAT_PATH;
+                                console.log(`[Notifications] Current path clean: ${getCleanPath()}, Is on chat page: ${isOnChatPage}`);
                                 // Only show toast if NOT on the user chat page
-                                if (window.location.pathname !== '/chat-user.html') {
+                                if (!isOnChatPage) {
+                                    console.log("[Notifications] Conditions met, calling showToastNotification");
                                     showToastNotification(messageData.text);
+                                } else {
+                                     console.log("[Notifications] User is on chat page, skipping toast.");
                                 }
                             } else {
-                                 console.log("Ignoring older admin message for notification:", messageData.text);
+                                 console.log("[Notifications] Ignoring older admin message for notification:", messageData.text);
                             }
                         }
                     });
                 }, error => {
-                    console.error("Error listening for chat notifications:", error);
+                    console.error("[Notifications] Error listening for chat notifications:", error);
                 });
+        } else {
+            console.log(`[Notifications] Listener NOT set up. UID: ${user.uid}, Already subscribed: ${!!unsubscribeNotifications}`);
         }
         // --------------------------------------------------------
 
@@ -564,8 +587,17 @@ fbAuth.onAuthStateChanged((user) => {
 
         // Clear the auth token unless on login page
         if (currentPath !== LOGIN_PATH) {
+             console.log("[Auth] Clearing strict auth token");
             sessionStorage.removeItem(authTokenKey);
         }
+
+        // Detach listener if user logs out or is unauthenticated
+        if (unsubscribeNotifications) {
+            console.log("[Notifications] Detaching listener due to unauthenticated state.");
+            unsubscribeNotifications();
+            unsubscribeNotifications = null;
+        }
+        // --------------------------------------------------------
 
         // If NOT on a public page, redirect TO login
         if (!isPublicPage(currentPath)) {
@@ -574,13 +606,6 @@ fbAuth.onAuthStateChanged((user) => {
             window.location.href = LOGIN_PATH + '.html';
         } else {
             console.log(`>>> Staying on public page: ${currentPath}`);
-        }
-
-        // Detach listener if user logs out or is unauthenticated
-        if (unsubscribeNotifications) {
-            console.log("Detaching notification listener due to unauthenticated state.");
-            unsubscribeNotifications();
-            unsubscribeNotifications = null;
         }
 
         if (resendButton) resendButton.style.display = 'none';
