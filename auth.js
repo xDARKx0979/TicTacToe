@@ -397,11 +397,57 @@ function handlePasswordReset(event) {
         });
 }
 
+// --- Toast Notification Functionality ---
+let toastTimeout = null; 
+
+function showToastNotification(message) {
+    let toastElement = document.getElementById('toast-notification');
+    
+    // Create element if it doesn't exist
+    if (!toastElement) {
+        toastElement = document.createElement('div');
+        toastElement.id = 'toast-notification';
+        document.body.appendChild(toastElement);
+    }
+    
+    toastElement.textContent = "New message from Dev: " + message.substring(0, 100) + (message.length > 100 ? '...' : ''); // Limit length
+    toastElement.classList.add('show');
+    
+    // Clear any existing timeout to reset timer
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
+    }
+    
+    // Auto-hide after 5 seconds
+    toastTimeout = setTimeout(() => {
+        toastElement.classList.remove('show');
+        toastTimeout = null; // Clear the timeout reference
+    }, 5000); 
+    
+    // Optional: Allow clicking to dismiss
+    toastElement.onclick = () => {
+        toastElement.classList.remove('show');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = null;
+    };
+}
+// --------------------------------------
+
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
+let unsubscribeNotifications = null; // Variable to hold the notification listener unsubscribe function
+
 fbAuth.onAuthStateChanged((user) => {
     const currentPath = getCleanPath();
     console.log(`>>> onAuthStateChanged: User: ${user ? user.email : 'null'}. Path: ${currentPath}`);
+
+    // --- Clean up previous notification listener --- 
+    if (unsubscribeNotifications) {
+        console.log("Detaching previous notification listener.");
+        unsubscribeNotifications();
+        unsubscribeNotifications = null;
+    }
+    // ---------------------------------------------
 
     clearError('auth-message');
     const resendButton = document.getElementById('resend-verification-button');
@@ -473,6 +519,44 @@ fbAuth.onAuthStateChanged((user) => {
         // Verified user is on a protected page (index, game, user chat, or admin on admin chat)
         console.log(`>>> Verified user staying on page: ${currentPath}`);
 
+        // --- Setup Notification Listener for Verified Users --- 
+        if (user.uid && !unsubscribeNotifications) { // Check UID exists and listener not already set
+            console.log(`Setting up notification listener for user ${user.uid}`);
+            const db = firebase.firestore(); // Ensure db is accessible here
+            const messagesRef = db.collection('chats').doc(user.uid).collection('messages');
+            
+            unsubscribeNotifications = messagesRef
+                .where('isAdmin', '==', true) // Only listen for admin messages
+                .orderBy('timestamp', 'desc') // Order by timestamp to potentially limit initial load (optional)
+                .limit(10) // Limit initial snapshot check to recent messages (optional)
+                .onSnapshot(snapshot => {
+                    console.log("Notification listener snapshot received");
+                    snapshot.docChanges().forEach(change => {
+                        // Only act on newly added messages after initial sync
+                        if (change.type === 'added' && !snapshot.metadata.hasPendingWrites) { 
+                             // Check if the message timestamp is recent enough (e.g., within last minute) 
+                            // This helps prevent showing old notifications on page reloads/reconnects
+                            const messageData = change.doc.data();
+                            const messageTime = messageData.timestamp?.toDate(); // Get timestamp as Date
+                            const now = new Date();
+                            
+                            if (messageTime && (now.getTime() - messageTime.getTime()) < 60000) { // Check if within last 60 seconds
+                                console.log("New admin message detected for notification:", messageData.text);
+                                // Only show toast if NOT on the user chat page
+                                if (window.location.pathname !== '/chat-user.html') {
+                                    showToastNotification(messageData.text);
+                                }
+                            } else {
+                                 console.log("Ignoring older admin message for notification:", messageData.text);
+                            }
+                        }
+                    });
+                }, error => {
+                    console.error("Error listening for chat notifications:", error);
+                });
+        }
+        // --------------------------------------------------------
+
     } else {
         // User is NOT properly authenticated (no user OR no token)
         console.log('>>> Auth state: NOT_AUTHENTICATED');
@@ -490,6 +574,13 @@ fbAuth.onAuthStateChanged((user) => {
             window.location.href = LOGIN_PATH + '.html';
         } else {
             console.log(`>>> Staying on public page: ${currentPath}`);
+        }
+
+        // Detach listener if user logs out or is unauthenticated
+        if (unsubscribeNotifications) {
+            console.log("Detaching notification listener due to unauthenticated state.");
+            unsubscribeNotifications();
+            unsubscribeNotifications = null;
         }
 
         if (resendButton) resendButton.style.display = 'none';
