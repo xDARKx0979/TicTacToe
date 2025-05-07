@@ -306,10 +306,12 @@ button:disabled,
 
 .support-button { /* Now uses fixed-button */
     /* Positioning handled by parent group */
-    background-color: #F96854;
-    color: white;
+    background-color: #F96854; /* Restore Patreon-like color */
+    color: white; /* Ensure text is white */
 }
-.support-button:hover { background-color: #E64A47; }
+.support-button:hover {
+    background-color: #E64A47; /* Darker shade for hover */
+}
 
 .chat-button-fixed { /* Now uses fixed-button + primary-action */
      /* Positioning handled by parent group */
@@ -750,6 +752,55 @@ body.admin-chat-page { /* Add this class to admin body tag in HTML */
 }
 
 /* --- END Chat Styles --- */
+
+/* --- Papa's Games Page Specific Styles --- */
+.container > .games-grid { /* Specific to Papa's games list inside a container */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto; /* Adjusted margin */
+}
+
+.container > .games-grid .game-button { /* Style for game links WITHIN the Papa's games grid */
+    background: var(--button-bg); /* Use theme variable */
+    border: 1px solid var(--border-color); /* Add a border to match theme */
+    border-radius: 10px;
+    padding: 20px; /* Increased padding */
+    text-align: center;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    cursor: pointer;
+    display: flex; /* For better internal alignment */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px; /* Ensure a minimum height */
+}
+
+.container > .games-grid .game-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px var(--shadow-color); /* Use theme shadow and enhance */
+    border-color: var(--primary-color); /* Highlight border on hover */
+}
+
+.container > .games-grid .game-button h2 {
+    margin: 0 0 5px 0; /* Adjusted margin */
+    font-size: 1.1rem; /* Slightly adjusted size */
+    color: var(--text-color);
+}
+
+.container > .games-grid .game-button p {
+    margin: 5px 0 0;
+    font-size: 0.85rem; /* Slightly adjusted size */
+    color: var(--text-secondary); /* Use theme variable */
+    opacity: 1; /* Remove previous opacity, rely on color */
+    line-height: 1.3;
+}
+
+/* --- END Papa's Games Page Specific Styles --- */
 
 /* --- Warning Box Style --- */
 .warning-box {

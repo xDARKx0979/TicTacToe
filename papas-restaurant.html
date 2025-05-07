@@ -5,56 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papa's Games</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="auth.js"></script>
+    <!-- Firebase SDKs (already present in auth.js, but good for clarity) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <!-- Google AdSense Code -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8366001403141760"
      crossorigin="anonymous"></script>
-    <style>
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .game-button {
-            background: var(--button-bg);
-            border: none;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            color: var(--text-color);
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        
-        .game-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .game-button h2 {
-            margin: 0;
-            font-size: 1.2em;
-        }
-        
-        .game-button p {
-            margin: 5px 0 0;
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-    </style>
+    <!-- Inline styles for .games-grid will be moved to styles.css -->
 </head>
 <body>
-    <a href="support.html" target="_blank" class="support-button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
-        </svg>
-        Support Creator
-    </a>
+    <div class="fixed-button-group">
+        <button id="logout-button" class="logout-button fixed-button danger-action" onclick="logoutUser()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 17v-3H9v-4h7V7l5 5-5 5zM14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9z"/>
+            </svg>
+            Logout
+        </button>
+        <a href="support.html" target="_blank" class="support-button fixed-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
+            </svg>
+            Support Creator
+        </a>
+        <a href="chat-user.html" class="chat-button-fixed fixed-button primary-action">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+            </svg>
+            Chat with Dev
+        </a>
+    </div>
 
     <div class="container">
         <a href="index.html" class="back-button">← Back to Games</a>
