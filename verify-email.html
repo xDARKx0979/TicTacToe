@@ -10,85 +10,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <style>
-        .verify-container {
-            max-width: 500px;
-            margin: 100px auto;
-            padding: 30px;
-            background: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .verify-container h1 {
-            margin-bottom: 20px;
-            color: var(--text-color);
-        }
-        .verify-container p {
-            margin-bottom: 25px;
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-        .verify-container .email-display {
-            font-weight: bold;
-            color: var(--text-color);
-        }
-        .verify-container button {
-            padding: 12px 25px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.2s;
-            text-decoration: none; /* For link-like behavior */
-            display: inline-block; /* For proper spacing */
-        }
-        .verify-container button:hover {
-            background: var(--primary-hover-color);
-        }
-        /* Style for the resend button */
-        #resend-verification-button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: var(--button-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            font-size: 14px;
-        }
-        #resend-verification-button:hover {
-             background: var(--cell-hover);
-        }
-        #resend-verification-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-         /* Message area styling */
-        #auth-message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .error-message { /* From styles.css, ensure it's defined */
-            color: var(--error-text, red);
-            background-color: var(--error-bg, #f8d7da);
-            border: 1px solid var(--error-border, #f5c6cb);
-            display: block; /* Make sure it takes space */
-            margin-bottom: 15px;
-        }
-        .success-message { /* Define success message style */
-             color: var(--success-text, green);
-             background-color: var(--success-bg, #d4edda);
-             border: 1px solid var(--success-border, #c3e6cb);
-             display: block; /* Make sure it takes space */
-             margin-bottom: 15px;
-        }
-    </style>
 </head>
 <body>
-    <div class="verify-container">
+    <div class="auth-container">
         <h1>Check Your Email</h1>
         <p>
             We've sent a verification link to <strong id="user-email" class="email-display">your email</strong>. 
@@ -99,9 +23,9 @@
         </p>
         
         <!-- Message area for status -->
-        <div id="auth-message" style="display: none;"></div> 
+        <div id="auth-message"></div>
         
-        <button id="check-verification-button">Check Verification & Proceed</button>
+        <button id="check-verification-button" class="primary-action">Check Verification & Proceed</button>
         
         <button id="resend-verification-button" style="display: none;">Resend Verification Email</button>
     </div>

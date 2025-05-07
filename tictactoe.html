@@ -10,12 +10,14 @@
      crossorigin="anonymous"></script>
 </head>
 <body>
-    <a href="support.html" target="_blank" class="support-button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
-        </svg>
-        Support Creator
-    </a>
+    <div class="fixed-button-group">
+        <a href="support.html" target="_blank" class="support-button fixed-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
+            </svg>
+            Support Creator
+        </a>
+    </div>
 
     <div class="container">
         <h1>Tic Tac Toe</h1>
@@ -32,7 +34,7 @@
             <div class="cell" data-cell-index="8"></div>
         </div>
         <div class="button-container">
-            <button id="restart">Restart Game</button>
+            <button id="restart" class="button-style">Restart Game</button>
             <a href="index.html" class="back-button">Back to Menu</a>
         </div>
     </div>

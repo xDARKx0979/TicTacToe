@@ -80,12 +80,15 @@
     </style>
 </head>
 <body>
-    <a href="support.html" target="_blank" class="support-button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
-        </svg>
-        Support Creator
-    </a>
+    <div class="fixed-button-group">
+        <a href="support.html" target="_blank" class="support-button fixed-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.82 2.41c3.96 0 7.18 3.22 7.18 7.18 0 3.96-3.22 7.18-7.18 7.18-3.96 0-7.18-3.22-7.18-7.18 0-3.96 3.22-7.18 7.18-7.18zM2 21.6h5.5V2.41H2V21.6z"/>
+            </svg>
+            Support Creator
+        </a>
+        <!-- Add Logout and Chat buttons here if they should appear on this page -->
+    </div>
 
     <div class="container tetris-container">
         <h1>Tetris</h1>
@@ -138,8 +141,8 @@
             </div>
         </div>
         <div class="button-container">
-            <button id="start">Start Game</button>
-            <button id="pause" disabled>Pause</button>
+            <button id="start" class="primary-action">Start Game</button>
+            <button id="pause" class="button-style" disabled>Pause</button>
             <a href="index.html" class="back-button">Back to Menu</a>
         </div>
     </div>

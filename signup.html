@@ -10,96 +10,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    
-    <style>
-        .auth-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 30px;
-            background: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .auth-container h1 {
-            margin-bottom: 20px;
-            color: var(--text-color);
-        }
-        .auth-form input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            background: var(--input-bg);
-            color: var(--text-color);
-            box-sizing: border-box; /* Include padding and border in element's total width and height */
-        }
-        .auth-form button {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.2s;
-        }
-        .auth-form button:hover {
-            background: var(--primary-hover-color);
-        }
-        .auth-container p {
-            margin-top: 20px;
-            color: var(--text-light);
-        }
-        .auth-container a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-        .auth-container a:hover {
-            text-decoration: underline;
-        }
-        .error-message {
-            color: #dc3545; /* Bootstrap danger color */
-            margin-bottom: 15px;
-            font-size: 0.9em;
-            display: none; /* Hidden by default */
-        }
-        .notice-box {
-            background-color: var(--notice-bg, #fff3cd); /* Light yellow background */
-            color: var(--notice-text, #664d03); /* Dark yellow/brown text */
-            border: 1px solid var(--notice-border, #ffecb5);
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: left;
-            font-size: 0.9em;
-        }
-        .dark-mode .notice-box {
-            background-color: var(--dark-notice-bg, #664d03);
-            color: var(--dark-notice-text, #ffecb5);
-            border-color: var(--dark-notice-border, #8d6e04);
-        }
-    </style>
 </head>
 <body>
     <div class="auth-container">
         <h1>Sign Up</h1>
         
         <!-- Signup System Update Notice -->
-        <div class="notice-box">
+        <div class="warning-box">
             <strong>Notice:</strong> We have updated our sign-in system for enhanced security. If you created an account before April 19th, you will need to sign up again. We apologize for any inconvenience this may cause.
         </div>
 
         <form id="signup-form" class="auth-form">
             <div id="signup-error" class="error-message"></div>
             <!-- Message for email verification status (optional, but good practice) -->
-            <div id="auth-message" class="error-message" style="display: none; color: orange; margin-bottom: 10px;"></div>
+            <div id="auth-message" class="error-message"></div>
             <input type="email" id="signup-email" placeholder="Email" required>
             <input type="password" id="signup-password" placeholder="Password (min. 6 characters)" required>
             <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
-            <button type="submit">Sign Up</button>
+            <button type="submit" class="primary-action">Sign Up</button>
         </form>
         <p>Already have an account? <a href="login.html">Log In</a></p>
     </div>
