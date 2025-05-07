@@ -267,7 +267,8 @@ button:disabled,
     z-index: 1000;
     display: flex;
     flex-direction: column; /* Stack them vertically */
-    gap: 8px; /* Space between buttons */
+    gap: 10px; /* Increased gap slightly */
+    align-items: flex-end; /* Align buttons to the right edge of the container */
 }
 
 /* Style for individual fixed buttons (apply to logout, support, chat) */
@@ -280,9 +281,12 @@ button:disabled,
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     display: flex; 
-    align-items: center;
+    align-items: center; /* Vertically align icon and text inside button */
     font-size: 14px;
     border: none; /* Override base border */
+    line-height: 1.4; /* Added for consistent text height */
+    flex-shrink: 0; /* Prevent shrinking */
+    /* The buttons will take their natural width based on content + padding */
 }
 
 .fixed-button:hover {
