@@ -310,19 +310,37 @@ button:disabled,
 
 .support-button { /* Now uses fixed-button */
     /* Positioning handled by parent group */
-    background-color: #F96854; /* Restore Patreon-like color */
-    color: white; /* Ensure text is white */
+    background-color: #FF69B4; /* Hot Pink for laughs */
+    color: white; /* Ensure text is white for contrast */
 }
 .support-button:hover {
-    background-color: #E64A47; /* Darker shade for hover */
+    background-color: #FF1493; /* Deep Pink for hover - a darker hot pink */
 }
 
-.chat-button-fixed { /* Now uses fixed-button + primary-action */
-     /* Positioning handled by parent group */
-     background-color: var(--primary-color);
-     color: white;
+.chat-button-fixed {
+    background-color: var(--primary-color); /* Match theme's primary color */
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold; /* This was '500' in .fixed-button, 'bold' might be slightly different */
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
 }
-.chat-button-fixed:hover { background-color: var(--primary-hover-color); }
+
+.chat-button-fixed:hover {
+    background-color: var(--primary-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.chat-button-fixed svg {
+    margin-right: 8px; /* Space between icon and text */
+    /* width/height set inline in HTML for this specific icon */
+} 
 
 /* --- REMOVE OLD FIXED BUTTON STYLES --- */
 /* Remove old .logout-button, .support-button, .chat-button-fixed positioning/styles */
@@ -821,36 +839,6 @@ body.admin-chat-page { /* Add this class to admin body tag in HTML */
     border-left-style: solid;
     border-left-color: #f59e0b;
 }
-
-/* New Fixed Chat Button */
-.chat-button-fixed {
-    position: fixed;
-    top: 63px; /* Positioned below support button (15px top + ~38px height + 10px gap) */
-    right: 15px;
-    background-color: var(--primary-color); /* Match theme's primary color */
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    z-index: 1000; /* Ensure it's above other content */
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-}
-
-.chat-button-fixed:hover {
-    background-color: var(--primary-hover-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.chat-button-fixed svg {
-    margin-right: 8px; /* Space between icon and text */
-    /* width/height set inline in HTML for this specific icon */
-} 
 
 /* --- Toast Notification Styles --- */
 #toast-notification {
