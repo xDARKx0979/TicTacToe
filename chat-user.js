@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let unsubscribe = null; // To stop listening when needed
     const db = firebase.firestore();
     const ADMIN_UID = "II9Ifc2Cu1Mc2ExdoR8k4v5Uhyy2"; // Ensure this matches your admin UID
+    const LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY = 'lastNotifiedAdminMessageTimestamp'; // Same key as in auth.js
 
     // Scroll to the bottom of the chat messages
     const scrollToBottom = () => {
@@ -59,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         unsubscribe = messagesRef.onSnapshot(snapshot => {
             console.log(`Received ${snapshot.docChanges().length} changes`);
             let newDevMessage = false;
+            let latestAdminMessageTsMillis = 0;
+
             if (messagesDiv.querySelector('.loading')) {
                  messagesDiv.innerHTML = ''; // Clear loading message
             }
@@ -68,10 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('New message:', messageData);
                     displayMessage(messageData);
 
-                    // Check if the message is from the dev (isAdmin or senderId is ADMIN_UID)
-                    // and currentUser is available to ensure we don't trigger for user's own initial load
                     if (currentUser && messageData.senderId !== currentUser.uid && (messageData.isAdmin || messageData.senderId === ADMIN_UID)) {
                         newDevMessage = true;
+                        // Track the latest admin message timestamp from this batch
+                        if (messageData.timestamp && messageData.timestamp.toMillis() > latestAdminMessageTsMillis) {
+                            latestAdminMessageTsMillis = messageData.timestamp.toMillis();
+                        }
                     }
                 }
             });
@@ -81,8 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pingSound) {
                     pingSound.play().catch(error => console.warn("Ping sound play failed:", error)); // Play sound
                 }
-                localStorage.setItem('hasUnreadDevMessages', 'true'); // Set flag
-                console.log("'hasUnreadDevMessages' flag set.");
+                localStorage.setItem('hasUnreadDevMessages', 'true'); // Set flag for bubble
+                console.log("'hasUnreadDevMessages' flag set for bubble.");
+
+                // Update the lastNotified timestamp to the latest admin message seen on this page
+                if (latestAdminMessageTsMillis > 0) {
+                    const currentLastNotified = parseInt(localStorage.getItem(LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY) || '0', 10);
+                    if (latestAdminMessageTsMillis > currentLastNotified) {
+                        localStorage.setItem(LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY, latestAdminMessageTsMillis.toString());
+                        console.log(`[Chat User] Updated lastNotifiedAdminMessageTimestamp to ${new Date(latestAdminMessageTsMillis).toISOString()}`);
+                    }
+                }
             }
 
             scrollToBottom(); // Scroll down after new messages are added
@@ -157,10 +171,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ensure Firestore is ready (sometimes a slight delay is needed)
             setTimeout(() => {
                  loadChat(user.uid);
-                 // Also clear flag here in case onAuthStateChanged is the entry point
-                 // and loadChat might not immediately clear it if called with a different uid initially (though unlikely here)
+                 // Clear bubble flag & update last notified timestamp for any messages initially loaded
                  localStorage.removeItem('hasUnreadDevMessages');
                  console.log("'hasUnreadDevMessages' flag cleared on auth state change after loadChat call.");
+                 
+                 // Proactively update lastNotified timestamp on entering chat page if there are existing admin messages
+                 // This requires a one-time read or using the initial snapshot from loadChat
+                 // The logic inside loadChat's onSnapshot will handle this for newly arriving messages while on page.
+                 // For messages already there when loadChat is called, we need an explicit update.
+                 // For simplicity, the onSnapshot in loadChat will now handle updating this timestamp.
+                 // If there are no *new* admin messages in the first snapshot, latestAdminMessageTsMillis will remain 0, 
+                 // and no update to LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY will occur from here, which is fine.
+                 // The main purpose is to update it if new admin messages *do* arrive while on this page.
+
             }, 500); // Small delay to ensure Firestore connection is stable
         } else {
             console.log('User not authenticated, cannot load chat.');

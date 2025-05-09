@@ -459,6 +459,7 @@ function showToastNotification(message) {
 // Check Authentication State Changes
 console.log('Setting up onAuthStateChanged listener...');
 let unsubscribeNotifications = null; // Variable to hold the notification listener unsubscribe function
+const LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY = 'lastNotifiedAdminMessageTimestamp';
 
 fbAuth.onAuthStateChanged((user) => {
     const currentPath = getCleanPath();
@@ -548,44 +549,71 @@ fbAuth.onAuthStateChanged((user) => {
             const db = firebase.firestore(); // Ensure db is accessible here
             const messagesRef = db.collection('chats').doc(user.uid).collection('messages');
             
+            // Get the timestamp of the last message for which a notification was shown
+            let lastNotifiedTimestamp = parseInt(localStorage.getItem(LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY) || '0', 10);
+            console.log(`[Notifications] Initial lastNotifiedTimestamp: ${new Date(lastNotifiedTimestamp).toISOString()}`);
+
             unsubscribeNotifications = messagesRef
                 .where('isAdmin', '==', true) // Only listen for admin messages
-                .orderBy('timestamp', 'desc') // Order by timestamp to potentially limit initial load (optional)
-                .limit(10) // Limit initial snapshot check to recent messages (optional)
+                .where('timestamp', '>', firebase.firestore.Timestamp.fromMillis(lastNotifiedTimestamp)) // Only get messages newer than last notified
+                .orderBy('timestamp', 'asc') // Order by oldest new to process in order
                 .onSnapshot(snapshot => {
-                    console.log(`[Notifications] Snapshot received. Metadata: pending=${snapshot.metadata.hasPendingWrites}`);
+                    console.log(`[Notifications] Snapshot received. Metadata: pending=${snapshot.metadata.hasPendingWrites}, empty: ${snapshot.empty}, changes: ${snapshot.docChanges().length}`);
+                    let newLatestAdminMessageTimestamp = lastNotifiedTimestamp;
+                    
                     snapshot.docChanges().forEach(change => {
-                        console.log(`[Notifications] Change detected: type=${change.type}, docId=${change.doc.id}`);
-                        // Only act on newly added messages after initial sync
-                        // TEMPORARILY REMOVED hasPendingWrites check for easier debugging
-                        // if (change.type === 'added' && !snapshot.metadata.hasPendingWrites) { 
                         if (change.type === 'added') { 
                              const messageData = change.doc.data();
-                             console.log("[Notifications] Added message data:", messageData);
-                             const messageTime = messageData.timestamp?.toDate(); // Get timestamp as Date
-                             const now = new Date();
-                             const isRecent = messageTime && (now.getTime() - messageTime.getTime()) < 60000; // Check if within last 60 seconds
-                             console.log(`[Notifications] Message time: ${messageTime}, Is recent: ${isRecent}`);
+                             console.log("[Notifications] Added admin message data:", messageData);
+                             const messageTimestampServer = messageData.timestamp; // This is a Firestore Timestamp object
 
-                            // TEMPORARILY REMOVED timestamp check for easier debugging
-                            // if (messageTime && (now.getTime() - messageTime.getTime()) < 60000) { 
-                            if (true) { // Always try to show for now
-                                const isOnChatPage = getCleanPath() === USER_CHAT_PATH;
-                                console.log(`[Notifications] Current path clean: ${getCleanPath()}, Is on chat page: ${isOnChatPage}`);
-                                // Only show toast if NOT on the user chat page
-                                if (!isOnChatPage) {
-                                    console.log("[Notifications] Conditions met, calling showToastNotification");
-                                    showToastNotification(messageData.text);
+                             if (messageTimestampServer) {
+                                const messageTimestampMillis = messageTimestampServer.toMillis();
+                                console.log(`[Notifications] Message ts: ${new Date(messageTimestampMillis).toISOString()}, Last notified ts: ${new Date(lastNotifiedTimestamp).toISOString()}`);
+
+                                // Double check it's newer, though the query should handle this
+                                if (messageTimestampMillis > lastNotifiedTimestamp) {
+                                    const isOnChatPage = getCleanPath() === USER_CHAT_PATH;
+                                    console.log(`[Notifications] Current path clean: ${getCleanPath()}, Is on chat page: ${isOnChatPage}`);
+                                    
+                                    if (!isOnChatPage && !document.hidden) { // Only show toast if not on chat page AND tab is visible
+                                        console.log("[Notifications] Conditions met (not on chat page, tab visible), calling showToastNotification for:", messageData.text);
+                                        showToastNotification(messageData.text);
+                                        // Update the timestamp of the latest message for which a notification was actually shown
+                                        if (messageTimestampMillis > newLatestAdminMessageTimestamp) {
+                                            newLatestAdminMessageTimestamp = messageTimestampMillis;
+                                        }
+                                    } else {
+                                         console.log(`[Notifications] Skipping toast. On chat page: ${isOnChatPage}, Tab hidden: ${document.hidden}`);
+                                         // Even if toast is skipped, update the last notified timestamp if this message is newer
+                                         // This handles the case where user is on chat page or tab is hidden, then comes back.
+                                         // They shouldn't be re-notified for messages they "saw" or were delivered while tab was hidden.
+                                         if (messageTimestampMillis > newLatestAdminMessageTimestamp) {
+                                            newLatestAdminMessageTimestamp = messageTimestampMillis;
+                                         }
+                                    }
                                 } else {
-                                     console.log("[Notifications] User is on chat page, skipping toast.");
+                                    console.log("[Notifications] Message timestamp not newer than lastNotifiedTimestamp, skipping (should be caught by query).");
                                 }
-                            } else {
-                                 console.log("[Notifications] Ignoring older admin message for notification:", messageData.text);
-                            }
+                             } else {
+                                 console.warn("[Notifications] Admin message missing timestamp:", messageData);
+                             }
                         }
                     });
+
+                    // After processing all changes in this snapshot, if newLatestAdminMessageTimestamp was updated, save it.
+                    if (newLatestAdminMessageTimestamp > lastNotifiedTimestamp) {
+                        console.log(`[Notifications] Updating lastNotifiedAdminMessageTimestamp in localStorage to: ${new Date(newLatestAdminMessageTimestamp).toISOString()}`);
+                        localStorage.setItem(LAST_NOTIFIED_ADMIN_MESSAGE_TIMESTAMP_KEY, newLatestAdminMessageTimestamp.toString());
+                        lastNotifiedTimestamp = newLatestAdminMessageTimestamp; // Update for next snapshot comparison within this session
+                    }
+
                 }, error => {
                     console.error("[Notifications] Error listening for chat notifications:", error);
+                     // It's possible the error is due to the query itself if the index is still building or misconfigured.
+                    if (error.code === 'failed-precondition' && error.message.includes('query requires an index')) {
+                        console.error("Firestore query error: Make sure the composite index for (isAdmin ASC, timestamp ASC) on the 'messages' collection group is created and enabled in your Firebase console.");
+                    }
                 });
         } else {
             console.log(`[Notifications] Listener NOT set up. UID: ${user.uid}, Already subscribed: ${!!unsubscribeNotifications}`);
