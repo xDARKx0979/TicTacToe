@@ -1040,3 +1040,15 @@ body.admin-chat-page { /* Add this class to admin body tag in HTML */
         align-items: center;
     }
 } 
+
+/* Notification Bubble Style */
+.notification-bubble {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    margin-left: 8px;
+    /* vertical-align: middle; Fixed buttons use flex, so this might not be needed or could conflict */
+    /* The parent .fixed-button already has display:flex and align-items:center */
+} 

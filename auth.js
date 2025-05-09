@@ -91,6 +91,18 @@ const PUBLIC_PAGES = [LOGIN_PATH, SIGNUP_PATH, RESET_PATH, VERIFY_EMAIL_PATH];
 // Note: Admin chat might need verification depending on requirements, but user chat definitely does.
 const ALLOWED_UNVERIFIED_PAGES = [LOGIN_PATH, SIGNUP_PATH, RESET_PATH, VERIFY_EMAIL_PATH];
 
+// Function to update the chat notification bubble visibility
+function updateChatNotificationBubble() {
+    const bubble = document.getElementById('chat-notification-bubble');
+    if (bubble) {
+        if (localStorage.getItem('hasUnreadDevMessages') === 'true') {
+            bubble.style.display = 'inline-block';
+        } else {
+            bubble.style.display = 'none';
+        }
+    }
+}
+
 function isPublicPage(path) {
     return PUBLIC_PAGES.includes(path);
 }
@@ -580,6 +592,11 @@ fbAuth.onAuthStateChanged((user) => {
         }
         // --------------------------------------------------------
 
+        // Update chat notification bubble on any auth state change or page load where auth.js runs
+        if (currentPath === INDEX_PATH) { // Only on index page
+            updateChatNotificationBubble();
+        }
+
     } else {
         // User is NOT properly authenticated (no user OR no token)
         console.log('>>> Auth state: NOT_AUTHENTICATED');
@@ -688,6 +705,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // -----------------------------
+
+    // Update chat bubble on initial load for index page
+    if (getCleanPath() === INDEX_PATH) {
+        updateChatNotificationBubble();
+    }
+
+    // Listen for storage events to update the bubble in real-time if index.html is open
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'hasUnreadDevMessages' && getCleanPath() === INDEX_PATH) {
+            updateChatNotificationBubble();
+        }
+    });
 });
 
 // Global logout function that can be called from HTML onclick

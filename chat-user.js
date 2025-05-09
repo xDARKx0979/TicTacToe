@@ -48,19 +48,43 @@ document.addEventListener('DOMContentLoaded', () => {
         
         messagesDiv.innerHTML = ''; // Clear previous messages
         
+        // Clear unread message flag when chat is loaded by the user
+        if (currentUser && currentUser.uid === userId) { // Ensure it's the current user's chat
+            localStorage.removeItem('hasUnreadDevMessages');
+            console.log("'hasUnreadDevMessages' flag cleared.");
+        }
+
         const messagesRef = db.collection('chats').doc(userId).collection('messages').orderBy('timestamp', 'asc');
 
         unsubscribe = messagesRef.onSnapshot(snapshot => {
             console.log(`Received ${snapshot.docChanges().length} changes`);
+            let newDevMessage = false;
             if (messagesDiv.querySelector('.loading')) {
                  messagesDiv.innerHTML = ''; // Clear loading message
             }
             snapshot.docChanges().forEach(change => {
                 if (change.type === 'added') {
-                    console.log('New message:', change.doc.data());
-                    displayMessage(change.doc.data());
+                    const messageData = change.doc.data();
+                    console.log('New message:', messageData);
+                    displayMessage(messageData);
+
+                    // Check if the message is from the dev (isAdmin or senderId is ADMIN_UID)
+                    // and currentUser is available to ensure we don't trigger for user's own initial load
+                    if (currentUser && messageData.senderId !== currentUser.uid && (messageData.isAdmin || messageData.senderId === ADMIN_UID)) {
+                        newDevMessage = true;
+                    }
                 }
             });
+
+            if (newDevMessage) {
+                const pingSound = document.getElementById('ping-sound');
+                if (pingSound) {
+                    pingSound.play().catch(error => console.warn("Ping sound play failed:", error)); // Play sound
+                }
+                localStorage.setItem('hasUnreadDevMessages', 'true'); // Set flag
+                console.log("'hasUnreadDevMessages' flag set.");
+            }
+
             scrollToBottom(); // Scroll down after new messages are added
         }, error => {
             console.error("Error listening to chat messages:", error);
@@ -88,6 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(() => {
                 console.log('Message sent successfully');
                 input.value = ''; // Clear input
+
+                // Play sent sound
+                const sentSound = document.getElementById('sent-ping-sound');
+                if (sentSound) {
+                    sentSound.play().catch(error => console.warn("Sent ping sound play failed:", error));
+                }
+
                 // Update session metadata (optional but good for admin view)
                 return sessionRef.set({ 
                     lastMessageTimestamp: messageData.timestamp, 
@@ -126,6 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ensure Firestore is ready (sometimes a slight delay is needed)
             setTimeout(() => {
                  loadChat(user.uid);
+                 // Also clear flag here in case onAuthStateChanged is the entry point
+                 // and loadChat might not immediately clear it if called with a different uid initially (though unlikely here)
+                 localStorage.removeItem('hasUnreadDevMessages');
+                 console.log("'hasUnreadDevMessages' flag cleared on auth state change after loadChat call.");
             }, 500); // Small delay to ensure Firestore connection is stable
         } else {
             console.log('User not authenticated, cannot load chat.');
